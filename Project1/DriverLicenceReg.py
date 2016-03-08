@@ -36,9 +36,11 @@ def DriverLicenceReg():
 			issuing_date = ("Please enter issuing date of the licence in MM-DD-YYYY format:")
 			while ( is_date_valid(issuing_date) == False): #I need to check if it is in MM-DD-YYYY format
 				print ("Issuing Date that you entered is invalid. Please try again.")
+				issuing_date = ("Please enter issuing date of the licence in MM-DD-YYYY format:")
                         expiring_date = ("Please enter expiring date of the licence in MM-DD-YYYY format:")
 			while ( is_date_valid(expiring_date) == False ): #I need to check if it is in MM-DD-YYYY format
                                 print ("Expiring Date that you entered is invalid. Please try again.")
+                                expiring_date = ("Please enter expiring date of the licence in MM-DD-YYYY format:")
 			print("Wait, we are processing...")
 			check = "SELECT * FROM people p WHERE p.sin = sin"
 			curs.execute(check,{ 'p.sin' : sin})
