@@ -1,4 +1,3 @@
-import sys
 import cx_Oracle
 import getpass
 
@@ -7,20 +6,23 @@ class Comm:
 		self.authMode = mode
 
 	def authenticate(self):
-		successful = False
+		successful = True
 		while(not successful):
-			user = input("Username: " )
+			user = input("Username [%s]: " % getpass.getuser())
+			if not user:
+				user = getpass.getuser()
 			password = getpass.getpass()
-			connString = ''+user+'/'+ password +'@gwynne.cs.ualberta.ca:1521/CRS'
+			connString = ''+user+'/'+ pw +'@gwynne.cs.ualberta.ca:1521/CRS'
 			try:
 				successful = True
 				self.connection = cx_Oracle.connect(connString)
 			except cx_Oracle.DatabaseError as exc:
 				successful = False
 				error, = exc.args
-				#print( sys.stderr, "Oracle code:", error.code)
-				print("Oracle message:", error.message)
+				print( sys.stderr, "Oracle code:", error.code)
+				print( sys.stderr, "Oracle message:", error.message)
 
 	def teardown(self):
-		#curs.close()
-		self.connection.close()
+		f_photo.close()
+		curs.close()
+		connection.close()
