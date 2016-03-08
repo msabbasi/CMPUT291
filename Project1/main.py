@@ -17,7 +17,7 @@ while(True):
 		choice = int(input("Choice not valid. Please choose a number between 1-6: "))
 	if (choice == 6):
 		break
-	if (choice == "3"):
+	if (choice == 3):
 		DriverLicenseReg()
 	app = App(choice, communication)
 	app.run()
