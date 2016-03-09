@@ -69,9 +69,6 @@ class App:
 		
 		self.comm.insert(people)
 
-	def vehicleReg(self):
-		return
-
 
 	def autoTransaction(self):
 		auto_sale = {}
@@ -171,20 +168,8 @@ class App:
 				DriverLicenceReg()
 		
 
-# get info for new vehicle registration 
-def vehicleReg():
-    print("Enter 'menu' to go back to main menu.")
-    print("Enter 'quit' to quit from the system.")
-    print("Enter 'insert' to register new vehicle.")
-    while(True):
-	Input=input("-->")
-	if( Input == "quit"):
-	    print("Exitting...")
-	    break
-	    #sys.exit()
-	if( Input == "menu"):
-	    MainMenu()
-	if( Input == "insert"):    
+	# get info for new vehicle registration 
+	def vehicleReg(): 
 	    serial_no = input("Please enter vehicle serial number:")
 	    while( len(serial_no) > 15 or serial_no == ""): #if serial_no is invalid
 		print("The serial number that you have entered is invalid. Please try again.")
@@ -214,5 +199,5 @@ def vehicleReg():
 	    while( type(type_id) != int): # type_id not an integer
 		print("The type_id is invalid. Please try again.")
 		type_id = int(input("Please enter the type_id:"))		
-		
-		
+			
+			
