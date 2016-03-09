@@ -143,7 +143,7 @@ class App:
 		if (len(row) == 0):
 			def DoesNotExistPerson():
 				print("The person that you want to add does not exits. You need to register the person firstly/n"
-#				print("If you want to register a new licence enter 'new'.\n Otherwise if you want to go back main menu enter main")
+				print("If you want to register a new licence enter 'new'.\n Otherwise if you want to go back main menu enter main")
 				NewInput = input("-->")
 				if ( NewInput == "menu"):
 					MainMenu()
