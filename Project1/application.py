@@ -23,14 +23,13 @@ class App:
 			elif inpt == 'c':
 				
 				if self.appMode == 1:
-					vehicleReg()
-					return 2
+					print ("Vehicle Registration")
 				elif self.appMode == 2:
 					autoTransaction()
 					return 2
 				elif self.appMode == 3:
 					driverLicenceReg()
-					return 2
+					return 3
 			else:
 				print("You entered an invalid input. Please try again!")
 		
@@ -69,6 +68,9 @@ class App:
 		people['addr'] = input("Address: ")
 		
 		self.comm.insert(people)
+
+	def vehicleReg(self):
+		return
 
 
 	def autoTransaction(self):
@@ -111,43 +113,36 @@ class App:
 
 		
 	def driverLicenceReg():
+		driverLicenceReg = {}
 		licence_no = input("Please enter Licence Number:")
 		while( len(licence_no)>15 or license_no == ""): #If licence no has more than 15 character and does not entered anything
 			print("The licence number that you entered is invalid. Please try again.")
 			licence_no = input("Please enter Licence Number:")
+		diverLicenceReg['licence_no'] = licence_no
 		sin = input("Please enter Social Insurance Number:")
                 while( len(sin) > 15 or sin == "" ):
                         print("The Social Insurance Number that you entered is invalid. Please try again.")
                         sin = input("Please enter Social Insurance Number:")
+		if !checkPersonReg(sin):
+			regPerson(sin)
+		driverLicenceReg['sin'] = sin
 		licence_class = input("Please enter Licence Class:")
 		while ( len(licence_class)>10) or licence_no = ""):
 			print ("The Licence Class that you entered is invalid. Please try again.")
 			licence_class = input("Please enter Licence Class:")
+		driverLicenceReg['class'] = licence_class 
 		photo_name = input("Please insert photo for licence (Optional) :")
 		issuing_date = ("Please enter issuing date of the licence in MM-DD-YYYY format:")
 		while ( is_date_valid(issuing_date) == False): #I need to check if it is in MM-DD-YYYY format
 			print ("Issuing Date that you entered is invalid. Please try again.")
 			issuing_date = ("Please enter issuing date of the licence in MM-DD-YYYY format:")
+		driverLicenceReg = ['issuing_date'] = issuing_date
                 expiring_date = ("Please enter expiring date of the licence in MM-DD-YYYY format:")
 		while ( is_date_valid(expiring_date) == False ): #I need to check if it is in MM-DD-YYYY format
                         print ("Expiring Date that you entered is invalid. Please try again.")
                         expiring_date = ("Please enter expiring date of the licence in MM-DD-YYYY format:")
+		driverLicenceReg = ['expiring_date'] = expiring_date
 		print("Wait, we are processing...")
-		check = "SELECT * FROM people p WHERE p.sin = sin"
-		curs.execute(check,{ 'p.sin' : sin})
-		row = curs.fetchall()
-		if (len(row) == 0):
-		def DoesNotExistPerson():
-			print("The person that you want to add does not exits. You need to register the person firstly/n"
-			print("If you want to register a new licence enter 'new'./n Otherwise if you want to go back main menu enter 'main")
-			NewInput = input("-->")
-			if ( NewInput == "menu"):
-				MainMenu()
-			elif ( NewInput == "new"):
-				DriverLicenceReg()
-			else:
-				print ("Invalid Entry")
-				DoesNotExistPerson()
 		try: 
 			if (photo_name = ""):
 				photo = None
@@ -155,22 +150,30 @@ class App:
 				f_photo = open(photo_name, 'rb')
 				photo = f_photo.read()
 				curs.setinputsizes(photo=cx_Oracle.BLOB)
-			insert = """ insert into drive_licence(licence_no, sin, class, photo, issuing_date, expiring_date) values (:licence_no, :sin, :class, :photo, to_date(:issuing_date, 'MM-DD-YYYY'), to_date(:expiring_date, 'MM-DD-YYYY')"""
-			curs.execute(insert, {'licence_no': licence_no, 'sin': sin, 'class': licence_class, 'photo': photo, 'issuing_date':issuing_date, 'expiring_date':expiring_date})
-			connection.commit()  	
+				driverLicenceReg = ['photo'] = photo
+			
+			self.comm.insert(driverLicenceReg)
 			print("You registered the new driver licence!")
-			print("You can choose a new option!")
-			DriverLicenceReg()
 			except cx_Oracle.DatabaseError as exc:
 				error=exc.args
 				print( sys.stderr, "Oracle code:", error.code)
 				print( sys.stderr, "Oracle message:", error.message)
-				print("You can choose a new option!")
-				DriverLicenceReg()
 		
 
-	# get info for new vehicle registration 
-	def vehicleReg(): 
+# get info for new vehicle registration 
+def vehicleReg():
+    print("Enter 'menu' to go back to main menu.")
+    print("Enter 'quit' to quit from the system.")
+    print("Enter 'insert' to register new vehicle.")
+    while(True):
+	Input=input("-->")
+	if( Input == "quit"):
+	    print("Exitting...")
+	    break
+	    #sys.exit()
+	if( Input == "menu"):
+	    MainMenu()
+	if( Input == "insert"):    
 	    serial_no = input("Please enter vehicle serial number:")
 	    while( len(serial_no) > 15 or serial_no == ""): #if serial_no is invalid
 		print("The serial number that you have entered is invalid. Please try again.")
@@ -199,16 +202,6 @@ class App:
 	    type_id = int(input("Please enter the type_id:"))
 	    while( type(type_id) != int): # type_id not an integer
 		print("The type_id is invalid. Please try again.")
-		type_id = int(input("Please enter the type_id:"))
-	    
-	    owner_id = input("Please enter the persons sin number:")
-	    while( len(owner_id) > 15 or owner_id == ""): # if sin is invalid
-	    	print("The sin is invalid. Please try again.")
-	    	owner_id = input("Please enter the persons sin number:")
-	    
-	    prim_own = input("Are they a primary owner('y' or 'n'):")
-	    while( prim_own != 'y' or prim_own != 'n'):
-	    	print("Invalid input. Please try again.")
-	    	prim_own = input("Are they a primary owner('y' or 'n'):")
-			
-			
+		type_id = int(input("Please enter the type_id:"))		
+		
+		
