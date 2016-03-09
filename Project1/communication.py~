@@ -23,12 +23,12 @@ class Comm:
 
 	def execute(self):
 		curs = self.connection.cursor()
-		#curs.execute("insert into movie(TITLE, movie_number) values('Spiderman', 1)")
-		#self.connection.commit()
-		#curs.execute("SELECT * from movie")
-		#rows = curs.fetchall()
-		#for row in rows:
-		#	print(row)
+		curs.execute("insert into movie(TITLE, movie_number) values('Spiderman', 1)")
+		self.connection.commit()
+		curs.execute("SELECT * from movie")
+		rows = curs.fetchall()
+		for row in rows:
+			print(row)
 		curs.close()
 
 	def teardown(self):

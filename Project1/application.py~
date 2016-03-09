@@ -11,7 +11,7 @@ class App:
 		checkReg = (input("Is the seller registered? (y/n) "))
 		people = {'sin': 'abcd', 'name': 'abcd', 'height': 5.20, 'weight': 5.20, 'eyecolor': 'blue', 'haircolor': 'brown', 'addr': '123 45 Ave NW, Edmonton', 'gender': '?', 'birthday': '12-03-96'}
 		if (checkReg == 'n'):
-			people['name'] = input("Name: ")
-			people['gender'] = input["Gender(f/m): ")
-			people[''] = input("Name: ")
+			for key in people:
+				people[key] = input(key)
+			print(people)
 		
