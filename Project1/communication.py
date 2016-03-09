@@ -21,10 +21,23 @@ class Comm:
 				#print( sys.stderr, "Oracle code:", error.code)
 				print("Oracle message:", error.message)
 
-	def insert(self, table):
-		curs = self.connection.cursor()
-		curs.close()
-		
+	def insert(self, table, name):
+		try:
+			curs = self.connection.cursor()
+			statement = 'insert into ' + name + '('
+			values = ' values('
+			for key in table:
+				statement+= key +', '
+				values+= table[key] +', '
+			statement += ') ' + values + ')'
+	
+			curs.execute(statement)
+			self.connection.commit()		
+			curs.close()
+		except cx_Oracle.DatabaseError as exc:
+			error, = exc.args
+			print( sys.stderr, "Oracle code:", error.code)
+			print( sys.stderr, "Oracle message:", error.message)	
 
 	def execute(self):
 		curs = self.connection.cursor()
