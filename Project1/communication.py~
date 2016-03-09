@@ -21,15 +21,18 @@ class Comm:
 				#print( sys.stderr, "Oracle code:", error.code)
 				print("Oracle message:", error.message)
 
+<<<<<<< HEAD
 	def execute(self):
 		curs = self.connection.cursor()
-		curs.execute("insert into movie(TITLE, movie_number) values('Spiderman', 1)")
-		self.connection.commit()
-		curs.execute("SELECT * from movie")
-		rows = curs.fetchall()
-		for row in rows:
-			print(row)
+		#curs.execute("insert into movie(TITLE, movie_number) values('Spiderman', 1)")
+		#self.connection.commit()
+		#curs.execute("SELECT * from movie")
+		#rows = curs.fetchall()
+		#for row in rows:
+		#	print(row)
 		curs.close()
+=======
+>>>>>>> c3180d7a82497d816a098c3d262e5965922279c4
 
 	def teardown(self):
 		#curs.close()

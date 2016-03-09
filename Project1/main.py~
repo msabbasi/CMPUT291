@@ -1,5 +1,6 @@
 import sys
 from communication import Comm
+from application import App
 #import cx_Oracle
 
 if len(sys.argv) < 2:
@@ -16,6 +17,11 @@ while(True):
 		choice = int(input("Choice not valid. Please choose a number between 1-6: "))
 	if (choice == 6):
 		break
+<<<<<<< HEAD
+=======
+	if (choice == 3):
+		DriverLicenseReg()
+>>>>>>> c3180d7a82497d816a098c3d262e5965922279c4
 	app = App(choice, communication)
 	app.run()
 
