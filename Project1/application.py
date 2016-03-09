@@ -24,16 +24,15 @@ class App:
 				
 				if self.appMode == 1:
 					vehicleReg()
-					return 2
 				elif self.appMode == 2:
 					autoTransaction()
 					return 2
 				elif self.appMode == 3:
 					driverLicenceReg()
-					return 2
+					return 3
 				elif self.appMode == 4:
 					regPerson()
-					return 2
+					return 4
 			else:
 				print("You entered an invalid input. Please try again!")
 		
@@ -73,6 +72,9 @@ class App:
 		people['addr'] = input("Address: ")
 		
 		self.comm.insert(people)
+
+	def vehicleReg(self):
+		return
 
 
 	def autoTransaction(self):
@@ -115,10 +117,12 @@ class App:
 
 		
 	def driverLicenceReg():
+		driverLicenceReg = {}
 		licence_no = input("Please enter Licence Number:")
 		while( len(licence_no)>15 or license_no == ""): #If licence no has more than 15 character and does not entered anything
 			print("The licence number that you entered is invalid. Please try again.")
 			licence_no = input("Please enter Licence Number:")
+		diverLicenceReg['licence_no'] = licence_no
 		sin = input("Please enter Social Insurance Number:")
 		while( len(sin) > 15 or sin == "" ):
 			print("The Social Insurance Number that you entered is invalid. Please try again.")
@@ -127,6 +131,7 @@ class App:
 		while ( len(licence_class)>10 or licence_class == ""):
 			print ("The Licence Class that you entered is invalid. Please try again.")
 			licence_class = input("Please enter Licence Class:")
+		driverLicenceReg['class'] = licence_class 
 		photo_name = input("Please insert photo for licence (Optional) :")
 		issuing_date = ("Please enter issuing date of the licence in MM-DD-YYYY format:")
 		while ( is_date_valid(issuing_date) == False): #I need to check if it is in MM-DD-YYYY format
@@ -169,8 +174,6 @@ class App:
 				error=exc.args
 				print( sys.stderr, "Oracle code:", error.code)
 				print( sys.stderr, "Oracle message:", error.message)
-				print("You can choose a new option!")
-				DriverLicenceReg()
 		
 
 	# get info for new vehicle registration 
@@ -202,8 +205,8 @@ class App:
 		
 		type_id = int(input("Please enter the type_id:"))
 		while( type(type_id) != int): # type_id not an integer
-		print("The type_id is invalid. Please try again.")
-		type_id = int(input("Please enter the type_id:"))
+			print("The type_id is invalid. Please try again.")
+			type_id = int(input("Please enter the type_id:"))
 		
 		owner_id = input("Please enter the persons sin number:")
 		while( len(owner_id) > 15 or owner_id == ""): # if sin is invalid
@@ -215,4 +218,4 @@ class App:
 			print("Invalid input. Please try again.")
 			prim_own = input("Are they a primary owner('y' or 'n'):")
 			
-			
+	
