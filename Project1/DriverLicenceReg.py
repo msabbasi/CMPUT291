@@ -27,7 +27,7 @@ def DriverLicenceReg():
 			sin = input("Please enter Social Insurance Number:")
                         while( len(sin) > 15 or sin == "" ):
                                 print("The Social Insurance Number that you entered is invalid. Please try again.")
-                                licence_no = input("Please enter Social Insurance Number:")
+                                sin = input("Please enter Social Insurance Number:")
 			licence_class = input("Please enter Licence Class:")
 			while ( len(licence_class)>10) or licence_no = ""):
 				print ("The Licence Class that you entered is invalid. Please try again.")

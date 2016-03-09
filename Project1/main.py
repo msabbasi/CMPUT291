@@ -20,8 +20,9 @@ while(True):
 	if (choice == 3):
 		DriverLicenseReg()
 	app = App(choice, communication)
-	app.run()
+	result = app.run()
+	if result == 0:
+		break
 
-	break
 
 communication.teardown()

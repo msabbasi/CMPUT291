@@ -21,6 +21,11 @@ class Comm:
 				#print( sys.stderr, "Oracle code:", error.code)
 				print("Oracle message:", error.message)
 
+	def insert(self, table):
+		curs = self.connection.cursor()
+		curs.close()
+		
+
 	def execute(self):
 		curs = self.connection.cursor()
 		#curs.execute("insert into movie(TITLE, movie_number) values('Spiderman', 1)")
@@ -30,6 +35,10 @@ class Comm:
 		#for row in rows:
 		#	print(row)
 		curs.close()
+
+	def getNewID(self, tableName):
+		#http://stackoverflow.com/questions/9016578/how-to-get-primary-key-column-in-oracle
+		return
 
 	def teardown(self):
 		#curs.close()
