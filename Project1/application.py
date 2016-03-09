@@ -170,6 +170,49 @@ class App:
 				print("You can choose a new option!")
 				DriverLicenceReg()
 		
+
+# get info for new vehicle registration 
+def vehicleReg():
+    print("Enter 'menu' to go back to main menu.")
+    print("Enter 'quit' to quit from the system.")
+    print("Enter 'insert' to register new vehicle.")
+    while(True):
+	Input=input("-->")
+	if( Input == "quit"):
+	    print("Exitting...")
+	    break
+	    #sys.exit()
+	if( Input == "menu"):
+	    MainMenu()
+	if( Input == "insert"):    
+	    serial_no = input("Please enter vehicle serial number:")
+	    while( len(serial_no) > 15 or serial_no == ""): #if serial_no is invalid
+		print("The serial number that you have entered is invalid. Please try again.")
+		serial_no = input("Please enter vehicle serial number:")		
+	    
+	    maker = input("Please enter the make of the vehicle:")
+	    while( len(maker) > 20 or maker == ""): #if maker is invalid
+		print("The make that you have entered is invalid. Please try again.")
+		maker = input("Please enter the make of the vehicle:")
+	    
+	    model = input("Please enter the model of the vehicle:")
+	    while( len(model) > 20 or model == ""): #if model is invalid
+		print("The model that you have entered is invalid. Please try again.")
+		model = input("Please enter the model of the vehicle:")
+	    
+	    year = int(input("Please enter the year of the vehicle:"))
+	    while( year > 9999 or year < 1): #if year is not between 1-4 digits 
+		print("The year that you have entered is invalid. Please try again.")
+		year = int(input("Please enter the year of the vehicle:"))
+	    
+	    color = input("Please enter the color of the vehicle:")
+	    while( len(color) > 10 or color == ""): # if color is invalid
+		print("The color that you have entered is invalid. Please try again.")
+		color = input("Please enter the color of the vehicle:")
 		
+	    type_id = int(input("Please enter the type_id:"))
+	    while( type(type_id) != int): # type_id not an integer
+		print("The type_id is invalid. Please try again.")
+		type_id = int(input("Please enter the type_id:"))		
 		
 		
