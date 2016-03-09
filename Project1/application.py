@@ -23,7 +23,8 @@ class App:
 			elif inpt == 'c':
 				
 				if self.appMode == 1:
-					print ("Vehicle Registration")
+					vehicleReg()
+					return 2
 				elif self.appMode == 2:
 					autoTransaction()
 					return 2
