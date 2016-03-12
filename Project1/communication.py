@@ -18,9 +18,7 @@ class Comm:
 				self.connection = cx_Oracle.connect(connString)
 				self.user = user			
 				self.curs = self.connection.cursor()
-				self.cursKey = self.connection.cursor()
 				self.cursListKeys = self.connection.cursor()
-				self.cursKey.prepare("SELECT cols.column_name, atc.data_type FROM all_constraints cons, all_cons_columns cols, all_tab_columns atc WHERE cols.table_name = :tableName AND atc.table_name = cols.table_name AND cons.constraint_type = 'P' AND cons.constraint_name = cols.constraint_name AND cols.column_name = atc.column_name AND cons.owner = cols.owner ORDER BY cols.table_name, cols.position")
 				#self.cursListKeys.prepare("SELECT :keyColumn FROM :tableName")
 				
 			except cx_Oracle.DatabaseError as exc:
@@ -47,7 +45,7 @@ class Comm:
 			values = values[:-2]
 			statement += ') ' + values + ')'
 	
-			print(statement)
+			#print(statement)
 			self.curs.execute(statement)
 			self.connection.commit()
 		except cx_Oracle.DatabaseError as exc:
@@ -55,20 +53,12 @@ class Comm:
 			print( sys.stderr, "Oracle code:", error.code)
 			print( sys.stderr, "Oracle message:", error.message)	
 
-	def getNewID(self, tableName):
+	def getNewID(self, tableName, column):
 		try:
-			self.cursKey.execute(None, {'tableName':tableName.upper()})
-			rows = self.cursKey.fetchall()
-			column = rows[0][0]
-			dataType = rows[0][1]
 
-			print(column)
-			print(dataType)
-			print(tableName.upper())
 
 			statement = 'select ' + column + ' from ' + tableName
 			self.cursListKeys.execute(statement)
-			#self.cursListKeys.execute(None, {'keyColumn':column, 'tableName':tableName})
 			rows = self.cursListKeys.fetchall()
 
 			if len(rows) == 0:
@@ -96,6 +86,5 @@ class Comm:
 
 	def teardown(self):
 		self.curs.close()
-		self.cursKey.close()
 		self.cursListKeys.close()
 		self.connection.close()

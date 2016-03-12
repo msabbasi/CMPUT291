@@ -31,15 +31,19 @@ class App:
 					self.driverLicenceReg()
 					return 3
 				elif self.appMode == 4:
+					self.violationRec()
 					return 4
+				elif self.appMode == 5:
+					self.searchEngine()
+					return 5
 			else:
 				print("You entered an invalid input. Please try again!")
 		
 
 	def checkPersonReg(self, sin):
-		curs = self.comm.cursor()
-		check = "SELECT * FROM people p WHERE p.sin = :sin"
-		curs.execute(check,{'sin' : sin})
+		curs = self.comm.connection.cursor()
+		check = "SELECT * FROM people p WHERE p.sin = '" + sin + "'"
+		curs.execute(check)
 		row = curs.fetchall()
 		curs.close()
 		if (len(row) == 0):
@@ -79,51 +83,53 @@ class App:
 		self.comm.insert(people, 'people')
 		print("SIN#" + sin + " successfully registered.")
 
-	def vehicleReg(self):
-		return
-
-
 	def autoTransaction(self):
 		auto_sale = {}
 
-		seller_id = input("Please enter the SIN of the seller: ")
+		seller_id = input("SIN of the seller: ")
 		while( len(seller_id) > 15 or seller_id == "" ):
 			print("The SIN that you entered is invalid. Please try again.")
-			seller_id = input("Please enter the SIN of the seller: ")
-		if not checkPersonReg(seller_id):
+			seller_id = input("SIN of the seller: ")
+		if not self.checkPersonReg(seller_id):
+			print("Person with the SIN entered not in system. Please register person:"
 			self.regPerson(seller_id)
 		auto_sale['seller_id'] = seller_id
 
-		buyer_id = input("Please enter the SIN of the buyer: ")
+		buyer_id = input("SIN of the buyer: ")
 		while( len(buyer_id) > 15 or buyer_id == "" ):
 			print("The SIN that you entered is invalid. Please try again.")
-			buyer_id = input("Please enter the SIN of the buyer: ")
-		if not checkPersonReg(buyer_id):
+			buyer_id = input("SIN of the buyer: ")
+		if not self.checkPersonReg(buyer_id):
+			print("Person with the SIN entered not in system. Please register person:"
 			self.regPerson(buyer_id)
 		auto_sale['buyer_id'] = buyer_id
 
 		checkVReg = input("Is the vehicle registered? (y/n)  ")
-		if (checkVReg == n):
+		if (checkVReg == 'n'):
 			vehicle_id = vehicleReg()
 		else:
-			vehicle_id = input("Please enter the vehicle serial #: ")
+			vehicle_id = input("Vehicle serial #: ")
 			while( len(vehicle_id) > 15 or vehicle_id == "" ):
 				print("The serial number that you entered is invalid. Please try again.")
-				vehicle_id = input("Please enter the vehicle serial #: ")
+				vehicle_id = input("Vehicle serial #: ")
 		auto_sale['vehicle_id'] = vehicle_id
-
+		#TODO: Check if exists
 		
-		saleDate = input("Please enter the date of the transaction (dd-mm-yy): ")
+		saleDate = input("Date of the transaction (dd-mm-yyyy): ")
 		auto_sale['s_date'] = parse(saleDate, dayfirst=True)
 
-		auto_sale['price'] = input("Please enter the price of the vehicle sold: ")
+		auto_sale['price'] = input("Price of the vehicle sold: ")
 
-		auto_sale['transaction_id'] = self.comm.getNewID('auto_sale')
+		auto_sale['transaction_id'] = self.comm.getNewID('auto_sale', 'transaction_id')
 
-		self.comm.insert(auto_sale)
+		self.comm.insert(auto_sale, 'auto_sale')
+
+		#TODO: Remove prev ownership
+
+		print("Auto transaction #" + auto_sale['transaction_id'] + " successfully registered.")
 
 		
-	def driverLicenceReg():
+	def driverLicenceReg(self):
 		driverLicenceReg = {}
 		licence_no = input("Please enter Licence Number:")
 		while( len(licence_no)>15 or license_no == ""): #If licence no has more than 15 character and does not entered anything
@@ -134,7 +140,7 @@ class App:
 		while( len(sin) > 15 or sin == "" ):
 			print("The Social Insurance Number that you entered is invalid. Please try again.")
 			sin = input("Please enter Social Insurance Number:")
-		if not checkPersonReg(sin):
+		if not self.checkPersonReg(sin):
 			regPerson(sin)
 		driverLicenceReg['sin'] = sin
 		licence_class = input("Please enter Licence Class:")
@@ -171,11 +177,11 @@ class App:
 		
 
 	# get info for new vehicle registration 
-	def vehicleReg(): 
-		serial_no = input("Please enter vehicle serial number:")
-		while( len(serial_no) > 15 or serial_no == ""): #if serial_no is invalid
-			print("The serial number that you have entered is invalid. Please try again.")
-			serial_no = input("Please enter vehicle serial number:")		
+	def vehicleReg(self):
+
+		vehicle = {}
+
+		vehicle['serial_no'] = self.comm.getNewID('vehicle', 'serial_no')
 		
 		maker = input("Please enter the make of the vehicle:")
 		while( len(maker) > 20 or maker == ""): #if maker is invalid
@@ -212,4 +218,57 @@ class App:
 			print("Invalid input. Please try again.")
 			prim_own = input("Are they a primary owner('y' or 'n'):")
 			
-	
+	def violationRec(self):
+		
+		#TODO: Better error handling
+		#TODO: Optional fields?
+		#TODO: Check foreign fields?
+
+		ticket = {}
+
+		ticket['ticket_no'] = self.comm.getNewID('ticket', 'ticket_no')
+
+		temp = input("SIN of the violator: ")
+		while( len(temp) > 15 or temp == "" ):
+			print("The SIN that you entered is invalid. Please try again.")
+			temp = input("SIN of the violator: ")
+		ticket['violator_no'] = temp
+
+		temp = input("Serial # of the vehicle involved: ")
+		while( len(temp) > 15 or temp == "" ):
+			print("The serial # that you entered is invalid. Please try again.")
+			temp = input("Serial # of the vehicle involved: ")
+		ticket['vehicle_id'] = temp
+
+		temp = input("SIN of the officer: ")
+		while( len(temp) > 15 or temp == "" ):
+			print("The SIN that you entered is invalid. Please try again.")
+			temp = input("SIN of the officer: ")
+		ticket['office_no'] = temp
+
+		temp = input("Violation type: ")
+		while( len(temp) > 10 or temp == "" ):
+			print("Your entry is invalid. Please try again.")
+			temp = input("Violation type: ")
+		ticket['vtype'] = temp
+
+		temp = input("Date of the violation (dd-mm-yyyy): ")
+		ticket['vdate'] = parse(temp, dayfirst=True)
+
+		temp = input("Place of violation: ")
+		while( len(temp) > 20 or temp == "" ):
+			print("Your entry is invalid. Please try again.")
+			temp = input("Place of violation: ")		
+		ticket['place'] = temp
+
+		temp = input("Description: ")
+		while( len(temp) > 1024 or temp == "" ):
+			print("Your entry is invalid. Please try again.")
+			temp = input("Description: ")	
+		ticket['descriptions'] = temp
+
+		self.comm.insert(ticket, 'ticket')
+
+	def searchEngine(self):
+		
+
