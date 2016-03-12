@@ -18,12 +18,10 @@ while(True):
 	if (choice == 6):
 		break
 
-	print(communication.getNewID('people'))
-	print(communication.getNewID('ticket'))
 	app = App(choice, communication)
-	#result = app.run()
-	#if result == 0:
-	#	break
+	result = app.run()
+	if result == 0:
+		break
 	
 
 

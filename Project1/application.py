@@ -57,7 +57,6 @@ class App:
 		return correctDate
 
 	def regPerson(self, sin):
-		#people = {'sin': 'abcd', 'name': 'abcd', 'height': 5.20, 'weight': 5.20, 'eyecolor': 'blue', 'haircolor': 'brown', 'addr': '123 45 Ave NW, Edmonton', 'gender': '?', 'birthday': '12-03-96'}
 
 		people = {}
 		people['sin'] = sin
@@ -114,7 +113,8 @@ class App:
 		auto_sale['vehicle_id'] = vehicle_id
 
 		
-		auto_sale['s_date'] = input("Please enter the date of the transaction (yy-mm-dd): ")
+		saleDate = input("Please enter the date of the transaction (dd-mm-yy): ")
+		auto_sale['s_date'] = parse(saleDate, dayfirst=True)
 
 		auto_sale['price'] = input("Please enter the price of the vehicle sold: ")
 
