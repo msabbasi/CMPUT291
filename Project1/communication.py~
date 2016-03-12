@@ -32,7 +32,7 @@ class Comm:
 				if isinstance(table[key], str):
 					values+= "'" + table[key] +"', "
 				elif isinstance(table[key], datetime):
-					values+= "date '" + table[key].strftime("%y-%m-%d") +"', "
+					values+= "date '" + table[key].strftime("%d-%m-%Y") +"', "
 				else:
 					values+= str(table[key]) +', '
 			statement = statement[:-2]
