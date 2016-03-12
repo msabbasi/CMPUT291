@@ -55,8 +55,6 @@ class Comm:
 
 	def getNewID(self, tableName, column):
 		try:
-
-
 			statement = 'select ' + column + ' from ' + tableName
 			self.cursListKeys.execute(statement)
 			rows = self.cursListKeys.fetchall()
