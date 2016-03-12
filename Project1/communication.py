@@ -16,6 +16,9 @@ class Comm:
 			try:
 				successful = True
 				self.connection = cx_Oracle.connect(connString)
+				self.user = user
+				self.cursID = self.connection.cursor()
+				self.cursID.prepare("SELECT cols.column_name, atc.data_type FROM all_constraints cons, all_cons_columns cols, all_tab_columns atc WHERE cols.table_name = :tableName AND atc.table_name = cols.table_name AND cons.constraint_type = 'P' AND cons.constraint_name = cols.constraint_name AND atc.owner = :username AND cons.owner = cols.owner AND atc.owner = cols.owner ORDER BY cols.table_name, cols.position")
 			except cx_Oracle.DatabaseError as exc:
 				successful = False
 				error, = exc.args
@@ -29,6 +32,8 @@ class Comm:
 			values = ' values('
 			for key in table:
 				statement+= key +', '
+				if key == 'photo':
+					curs.setinputsizes(image=cx_Oracle.BLOB)
 				if isinstance(table[key], str):
 					values+= "'" + table[key] +"', "
 				elif isinstance(table[key], datetime):
@@ -48,18 +53,16 @@ class Comm:
 			print( sys.stderr, "Oracle code:", error.code)
 			print( sys.stderr, "Oracle message:", error.message)	
 
-	def execute(self):
-		curs = self.connection.cursor()
-		#curs.execute("insert into movie(TITLE, movie_number) values('Spiderman', 1)")
-		#self.connection.commit()
-		#curs.execute("SELECT * from movie")
-		#rows = curs.fetchall()
-		#for row in rows:
-		#	print(row)
-		curs.close()
-
 	def getNewID(self, tableName):
-		#http://stackoverflow.com/questions/9016578/how-to-get-primary-key-column-in-oracle
+		try:
+			self.cursID.execute(None, {'tableName':tableName.upper(), 'username':self.user})
+			rows = self.cursID.fetchall()
+			for row in rows:
+				print(row)
+		except cx_Oracle.DatabaseError as exc:
+			error, = exc.args
+			print( sys.stderr, "Oracle code:", error.code)
+			print( sys.stderr, "Oracle message:", error.message)	
 		return
 
 	def teardown(self):

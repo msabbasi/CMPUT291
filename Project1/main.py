@@ -17,10 +17,14 @@ while(True):
 		choice = int(input("Choice not valid. Please choose a number between 1-6: "))
 	if (choice == 6):
 		break
+
+	communication.getNewID('people')
+	communication.getNewID('owner')
 	app = App(choice, communication)
-	result = app.run()
-	if result == 0:
-		break
+	#result = app.run()
+	#if result == 0:
+	#	break
+	
 
 
 communication.teardown()

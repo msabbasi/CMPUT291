@@ -31,7 +31,6 @@ class App:
 					self.driverLicenceReg()
 					return 3
 				elif self.appMode == 4:
-					self.regPerson('45634563')
 					return 4
 			else:
 				print("You entered an invalid input. Please try again!")
@@ -63,16 +62,23 @@ class App:
 		people = {}
 		people['sin'] = sin
 		people['name'] = input("Name: ")
-		people['gender'] = input("Gender(f/m): ")
+		gender = input("Gender(f/m): ")
+		while(True):
+			if (gender == 'f' or gender == 'm'):
+				people['gender'] = gender
+				break
+			else:
+				gender = input("Invalid entry. Please try again.\nGender(f/m): ")
 		birthday = input("Birthday (dd-mm-yyyy): ")
 		people['birthday'] = parse(birthday, dayfirst=True)
-		people['height'] = float(input("Height: "))
-		people['weight'] = float(input("Weight: "))
+		people['height'] = float(input("Height (cm): "))
+		people['weight'] = float(input("Weight (kg): "))
 		people['eyecolor'] = input("Eye colour: ")
 		people['haircolor'] = input("Hair colour: ")
 		people['addr'] = input("Address: ")
 		
 		self.comm.insert(people, 'people')
+		print("SIN#" + sin + " successfully registered.")
 
 	def vehicleReg(self):
 		return
@@ -86,7 +92,7 @@ class App:
 			print("The SIN that you entered is invalid. Please try again.")
 			seller_id = input("Please enter the SIN of the seller: ")
 		if not checkPersonReg(seller_id):
-			regPerson(seller_id)
+			self.regPerson(seller_id)
 		auto_sale['seller_id'] = seller_id
 
 		buyer_id = input("Please enter the SIN of the buyer: ")
@@ -94,7 +100,7 @@ class App:
 			print("The SIN that you entered is invalid. Please try again.")
 			buyer_id = input("Please enter the SIN of the buyer: ")
 		if not checkPersonReg(buyer_id):
-			regPerson(buyer_id)
+			self.regPerson(buyer_id)
 		auto_sale['buyer_id'] = buyer_id
 
 		checkVReg = input("Is the vehicle registered? (y/n)  ")
@@ -154,7 +160,6 @@ class App:
 			else:
 				f_photo = open(photo_name, 'rb')
 				photo = f_photo.read()
-				curs.setinputsizes(photo=cx_Oracle.BLOB)
 				driverLicenceReg['photo'] = photo
 			
 			self.comm.insert(driverLicenceReg)
