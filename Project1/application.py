@@ -285,19 +285,19 @@ class App:
 
 			if choice == 1:
 				print("Driver Information")
-				term = input("Enter name: ")
+				term = input("Enter name or leave blank to change choice: ")
 			elif choice == 2:
 				print("Driver Information")
-				term = input("Enter licence number: ")
+				term = input("Enter licence number or leave blank to change choice: ")
 			elif choice == 3:
 				print("Violation Records")
-				term = input("Enter name: ")
+				term = input("Enter name or leave blank to change choice: ")
 			elif choice == 4:
 				print("Violation Records")
-				term = input("Enter SIN: ")
+				term = input("Enter SIN or leave blank to change choice: ")
 			elif choice == 5:
 				print("Vehicle History")
-				term = input("Enter serial number: ")
+				term = input("Enter serial number or leave blank to change choice: ")
 			else choice == 6:
 				break
 

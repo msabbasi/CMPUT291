@@ -94,14 +94,27 @@ class Comm:
 	def search(self, mode, term):
 		if mode == 1:
 			self.curs1.execute(None, {'variable':term})
+			rows = self.curs1.fetchall();
 		elif mode == 2:
 			self.curs2.execute(None, {'variable':term})
+			rows = self.curs1.fetchall();
 		elif mode == 3:
 			self.curs3.execute(None, {'variable':term})
+			rows = self.curs1.fetchall();
 		elif mode == 4:
 			self.curs4.execute(None, {'variable':term})
+			rows = self.curs1.fetchall();
 		else mode == 5:
 			self.curs5.execute(None, {'variable':term})
+			rows = self.curs1.fetchall();
+
+		if len(rows) == 0:
+			print("No results found.")
+			return
+
+		for row in rows:
+			print(row)
+		
 			
 
 	def teardown(self):
