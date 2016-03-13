@@ -270,5 +270,36 @@ class App:
 		self.comm.insert(ticket, 'ticket')
 
 	def searchEngine(self):
-		
+		while(True):
+			print("Select an option:")
+			print("1. Search driver information by name")
+			print("2. Search driver information by licence number")
+			print("3. Search violation records by name")
+			print("4. Search violation records by SIN")
+			print("5. Search vehicle history by serial number")
+			print("6. Return to main menu")
+			choice = int(input("-->"))
+
+			while (choice > 6 or choice < 1):
+				choice = int(input("Choice not valid. Please choose a number between 1-5: "))
+
+			if choice == 1:
+				print("Driver Information")
+				term = input("Enter name: ")
+			elif choice == 2:
+				print("Driver Information")
+				term = input("Enter licence number: ")
+			elif choice == 3:
+				print("Violation Records")
+				term = input("Enter name: ")
+			elif choice == 4:
+				print("Violation Records")
+				term = input("Enter SIN: ")
+			elif choice == 5:
+				print("Vehicle History")
+				term = input("Enter serial number: ")
+			else choice == 6:
+				break
+
+			self.comm.search(choice, term)
 

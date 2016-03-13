@@ -19,7 +19,16 @@ class Comm:
 				self.user = user			
 				self.curs = self.connection.cursor()
 				self.cursListKeys = self.connection.cursor()
-				#self.cursListKeys.prepare("SELECT :keyColumn FROM :tableName")
+				self.curs1 = self.connection.cursor()
+				self.curs1.prepare("SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description dl.expiring_date FROM people p, drive_licence dl, driving_condition dc, restriction r WHERE p.name = :variable AND p.sin = dl.sin AND dl.licence_no = r.licence_no AND r.r_id = dc.c_id")
+				self.curs2 = self.connection.cursor()
+				self.curs2.prepare("SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description dl.expiring_date FROM people p, drive_licence dl, driving_condition dc, restriction r WHERE dl.licence_no = :variable AND p.sin = dl.sin AND dl.licence_no = r.licence_no AND r.r_id = dc.c_id")
+				self.curs3 = self.connection.cursor()
+				self.curs3.prepare("SELECT * FROM people p, drive_licence dl, driving_condition dc, restriction r WHERE p.name = :variable AND p.sin = dl.sin AND dl.licence_no = r.licence_no AND r.r_id = dc.c_id")
+				self.curs4 = self.connection.cursor()
+				self.curs4.prepare("SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description dl.expiring_date FROM people p, drive_licence dl, driving_condition dc, restriction r WHERE p.name = :variable AND p.sin = dl.sin AND dl.licence_no = r.licence_no AND r.r_id = dc.c_id")
+				self.curs5 = self.connection.cursor()
+				self.curs5.prepare("SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description dl.expiring_date FROM people p, drive_licence dl, driving_condition dc, restriction r WHERE p.name = :variable AND p.sin = dl.sin AND dl.licence_no = r.licence_no AND r.r_id = dc.c_id"")
 				
 			except cx_Oracle.DatabaseError as exc:
 				successful = False
@@ -82,7 +91,25 @@ class Comm:
 			print( sys.stderr, "Oracle message:", error.message)	
 		return
 
+	def search(self, mode, term):
+		if mode == 1:
+			self.curs1.execute(None, {'variable':term})
+		elif mode == 2:
+			self.curs2.execute(None, {'variable':term})
+		elif mode == 3:
+			self.curs3.execute(None, {'variable':term})
+		elif mode == 4:
+			self.curs4.execute(None, {'variable':term})
+		else mode == 5:
+			self.curs5.execute(None, {'variable':term})
+			
+
 	def teardown(self):
 		self.curs.close()
+		self.curs1.close()
+		self.curs2.close()
+		self.curs3.close()
+		self.curs4.close()
+		self.curs5.close()
 		self.cursListKeys.close()
 		self.connection.close()
