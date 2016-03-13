@@ -20,15 +20,15 @@ class Comm:
 				self.curs = self.connection.cursor()
 				self.cursListKeys = self.connection.cursor()
 				self.curs1 = self.connection.cursor()
-				self.curs1.prepare("SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description dl.expiring_date FROM people p, drive_licence dl, driving_condition dc, restriction r WHERE p.name = :variable AND p.sin = dl.sin AND dl.licence_no = r.licence_no AND r.r_id = dc.c_id")
+				self.curs1.prepare('SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description , dl.expiring_date FROM people p, drive_licence dl, restriction r, driving_condition dc WHERE p.sin = dl.sin AND r.licence_no (+)= dl.licence_no AND dc.c_id (+)= r.r_id AND p.name =:variable')
 				self.curs2 = self.connection.cursor()
-				self.curs2.prepare("SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description dl.expiring_date FROM people p, drive_licence dl, driving_condition dc, restriction r WHERE dl.licence_no = :variable AND p.sin = dl.sin AND dl.licence_no = r.licence_no AND r.r_id = dc.c_id")
+				self.curs2.prepare("SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description , dl.expiring_date FROM people p, drive_licence dl, restriction r, driving_condition dc WHERE p.sin = dl.sin AND r.licence_no (+)= dl.licence_no AND dc.c_id (+)= r.r_id AND dl.licence_no = :variable ")
 				self.curs3 = self.connection.cursor()
-				self.curs3.prepare("SELECT * FROM people p, drive_licence dl, driving_condition dc, restriction r WHERE p.name = :variable AND p.sin = dl.sin AND dl.licence_no = r.licence_no AND r.r_id = dc.c_id")
+				self.curs3.prepare("SELECT t.*, tt.fine FROM people p, ticket t, ticket_type tt WHERE p.name = :variable AND p.sin = t.violator_no AND t.vtype = tt.vtype")
 				self.curs4 = self.connection.cursor()
-				self.curs4.prepare("SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description dl.expiring_date FROM people p, drive_licence dl, driving_condition dc, restriction r WHERE p.name = :variable AND p.sin = dl.sin AND dl.licence_no = r.licence_no AND r.r_id = dc.c_id")
+				self.curs4.prepare("SELECT t.*, tt.fine FROM people p, ticket t, ticket_type tt WHERE p.sin = :variable AND p.sin = t.violator_no AND t.vtype = tt.vtype")
 				self.curs5 = self.connection.cursor()
-				self.curs5.prepare("SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description dl.expiring_date FROM people p, drive_licence dl, driving_condition dc, restriction r WHERE p.name = :variable AND p.sin = dl.sin AND dl.licence_no = r.licence_no AND r.r_id = dc.c_id"")
+				self.curs5.prepare("SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description, dl.expiring_date FROM people p, drive_licence dl, driving_condition dc, restriction r WHERE p.name = :variable AND p.sin = dl.sin AND dl.licence_no = r.licence_no AND r.r_id = dc.c_id")
 				
 			except cx_Oracle.DatabaseError as exc:
 				successful = False
@@ -94,19 +94,19 @@ class Comm:
 	def search(self, mode, term):
 		if mode == 1:
 			self.curs1.execute(None, {'variable':term})
-			rows = self.curs1.fetchall();
+			rows = self.curs1.fetchall();		    			
 		elif mode == 2:
 			self.curs2.execute(None, {'variable':term})
-			rows = self.curs1.fetchall();
+			rows = self.curs2.fetchall();
 		elif mode == 3:
 			self.curs3.execute(None, {'variable':term})
-			rows = self.curs1.fetchall();
+			rows = self.curs3.fetchall();
 		elif mode == 4:
 			self.curs4.execute(None, {'variable':term})
-			rows = self.curs1.fetchall();
-		else mode == 5:
+			rows = self.curs4.fetchall();
+		else:
 			self.curs5.execute(None, {'variable':term})
-			rows = self.curs1.fetchall();
+			rows = self.curs5.fetchall();
 
 		if len(rows) == 0:
 			print("No results found.")
@@ -114,8 +114,6 @@ class Comm:
 
 		for row in rows:
 			print(row)
-		
-			
 
 	def teardown(self):
 		self.curs.close()
@@ -126,3 +124,6 @@ class Comm:
 		self.curs5.close()
 		self.cursListKeys.close()
 		self.connection.close()
+
+
+

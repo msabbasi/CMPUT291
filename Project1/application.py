@@ -91,7 +91,7 @@ class App:
 			print("The SIN that you entered is invalid. Please try again.")
 			seller_id = input("SIN of the seller: ")
 		if not self.checkPersonReg(seller_id):
-			print("Person with the SIN entered not in system. Please register person:"
+			print("Person with the SIN entered not in system. Please register person:")
 			self.regPerson(seller_id)
 		auto_sale['seller_id'] = seller_id
 
@@ -100,7 +100,7 @@ class App:
 			print("The SIN that you entered is invalid. Please try again.")
 			buyer_id = input("SIN of the buyer: ")
 		if not self.checkPersonReg(buyer_id):
-			print("Person with the SIN entered not in system. Please register person:"
+			print("Person with the SIN entered not in system. Please register person:")
 			self.regPerson(buyer_id)
 		auto_sale['buyer_id'] = buyer_id
 
@@ -298,7 +298,7 @@ class App:
 			elif choice == 5:
 				print("Vehicle History")
 				term = input("Enter serial number or leave blank to change choice: ")
-			else choice == 6:
+			else:
 				break
 
 			self.comm.search(choice, term)
