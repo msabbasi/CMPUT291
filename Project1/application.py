@@ -207,70 +207,57 @@ class App:
 
 	# get info for new vehicle registration 
 	def vehicleReg(self):
+
 		vehicle = {}
 		owner = {}
-		# create new serial number and store in vehicle dict
+		
 		serial_no =  self.comm.getNewID('vehicle', 'serial_no')
+
 		vehicle['serial_no'] = serial_no
 		
-		owner['vehicle_id'] = serial_no
-		owner_id = input("Please enter the persons sin number:")
-		while( len(owner_id) > 15 or owner_id == ""): # if sin is invalid
-			print("The sin is invalid. Please try again.")
-			owner_id = input("Please enter the persons sin number:")
-		# need to check if person is in database 
-		if (checkPersonReg(owner_id) == True):
-			# if returns true we are ok 
-			pass
-		# else need to add them to database first 
-		else:
-			regPerson(owner_id)
-		# store their sin in our owner dict 
-		owner['owner_id'] = owner_id
-		
-		# deal with primary and secondary owners 
-		# this should almost be a function on its own 
-		# since if there is multiple owners need to call again to deal with this
-		# but not certain
-		prim_own = input("Are they a primary owner('y' or 'n'):")
-		while( prim_own != 'y' or prim_own != 'n'):
-			print("Invalid input. Please try again.")
-			prim_own = input("Are they a primary owner('y' or 'n'):")
-		owner['is_primary_owner'] = prim_own
-		
-		# get vehicle make 
 		maker = input("Please enter the make of the vehicle:")
 		while( len(maker) > 20 or maker == ""): #if maker is invalid
 			print("The make that you have entered is invalid. Please try again.")
 			maker = input("Please enter the make of the vehicle:")
 		vehicle['maker'] = maker
-		# get vehicle model
+
 		model = input("Please enter the model of the vehicle:")
 		while( len(model) > 20 or model == ""): #if model is invalid
 			print("The model that you have entered is invalid. Please try again.")
 			model = input("Please enter the model of the vehicle:")
 		vehicle['model'] = model
-		# get vehicle year
+
 		year = int(input("Please enter the year of the vehicle:"))
 		while( year > 9999 or year < 1): #if year is not between 1-4 digits 
 			print("The year that you have entered is invalid. Please try again.")
 			year = int(input("Please enter the year of the vehicle:"))
 		vehicle['year'] = year
-		# get vehicle color 
+
 		color = input("Please enter the color of the vehicle:")
 		while( len(color) > 10 or color == ""): # if color is invalid
 			print("The color that you have entered is invalid. Please try again.")
 			color = input("Please enter the color of the vehicle:")
 		vehicle['color'] = color
-		# get vehicle type_id
-		# should we have function to look and find the type_id?
+	
 		type_id = int(input("Please enter the type_id:"))
 		while( type(type_id) != int): # type_id not an integer
 			print("The type_id is invalid. Please try again.")
 			type_id = int(input("Please enter the type_id:"))
 		vehicle['type_id'] = type_id
 		
-		# finally add the vehicle and owner to database
+		owner['vehicle_id'] = serial_no
+		owner_id = input("Please enter the persons sin number:")
+		while( len(owner_id) > 15 or owner_id == ""): # if sin is invalid
+			print("The sin is invalid. Please try again.")
+			owner_id = input("Please enter the persons sin number:")
+		owner['owner_id'] = owner_id
+
+		prim_own = input("Are they a primary owner('y' or 'n'):")
+		while( prim_own != 'y' or prim_own != 'n'):
+			print("Invalid input. Please try again.")
+			prim_own = input("Are they a primary owner('y' or 'n'):")
+		owner['is_primary_owner'] = prim_own
+
 		self.comm.insert(vehicle, 'vehicle')
 		self.comm.insert(owner, 'owner')
 	
