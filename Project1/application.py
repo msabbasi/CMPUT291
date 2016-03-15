@@ -115,6 +115,14 @@ class App:
 			return False
 		else:
 			return True
+			
+	# function to deal with primary/secondary owners 
+	def primaryOwn(self):
+		prim_own = input("Are they a primary owner('y' or 'n'):")
+		while( prim_own != 'y' or prim_own != 'n'):
+			print("Invalid input. Please try again.")
+			prim_own = input("Are they a primary owner('y' or 'n'):")
+		return prim_own
 	
 	def autoTransaction(self):
 		auto_sale = {}
@@ -237,13 +245,7 @@ class App:
 		owner['owner_id'] = owner_id
 		
 		# deal with primary and secondary owners 
-		# this should almost be a function on its own 
-		# since if there is multiple owners need to call again to deal with this
-		# but not certain
-		prim_own = input("Are they a primary owner('y' or 'n'):")
-		while( prim_own != 'y' or prim_own != 'n'):
-			print("Invalid input. Please try again.")
-			prim_own = input("Are they a primary owner('y' or 'n'):")
+		primaryOwner()
 		owner['is_primary_owner'] = prim_own
 		
 		# get vehicle make 
@@ -281,7 +283,7 @@ class App:
 		# finally add the vehicle and owner to database
 		self.comm.insert(vehicle, 'vehicle')
 		self.comm.insert(owner, 'owner')
-	
+			
 	def violationRec(self):
 		
 		#TODO: Better error handling
