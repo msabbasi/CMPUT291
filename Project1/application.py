@@ -131,9 +131,9 @@ class App:
 			return True
 			
 	# function to deal with primary/secondary owners 
-	def addOwner(self, owner):
+	def addOwner(self, owner, mode):
 		# get owner_id
-		owner_id = input("Please enter the persons sin number:")
+		owner_id = input("Please enter the person's sin number:")
 		while( len(owner_id) > 15 or owner_id == ""): # if sin is invalid
 			print("The sin is invalid. Please try again.")
 			owner_id = input("Please enter the persons sin number:")
@@ -146,14 +146,15 @@ class App:
 			self.regPerson(owner_id)
 		# add their sin to our dict
 		owner['owner_id'] = owner_id
-		# is primary owner?
-		prim_own = input("Are they a primary owner('y' or 'n'):")
-		while( prim_own != 'y' and prim_own != 'n'):
-			print("Invalid input. Please try again.")
+		if (mode == 0):
+			# is primary owner?
 			prim_own = input("Are they a primary owner('y' or 'n'):")
-		# add response to our dict	
-		owner['is_primary_owner'] = prim_own
-		
+			while( prim_own != 'y' and prim_own != 'n'):
+				print("Invalid input. Please try again.")
+				prim_own = input("Are they a primary owner('y' or 'n'):")
+			# add response to our dict	
+			owner['is_primary_owner'] = prim_own	
+	
 		return owner
 	
 	def removePrevOwners(self, serial_no):
@@ -212,22 +213,26 @@ class App:
 
 		auto_sale['transaction_id'] = self.comm.getNewID('auto_sale', 'transaction_id')
 
+		self.comm.insert(auto_sale, 'auto_sale')
 
 		removePrevOwners(vehicle_id)
-
-		self.comm.insert(auto_sale, 'auto_sale')
 
 
 		owner = {}
 		owner['vehicle_id'] = serial_no
-		
+		owner['owner_id'] = buyer_id
+		owner['is_primary_owner'] = 'y'
+				
+		self.comm.insert(owner, 'owner')
+
 		while(True):
-			# deal with primary and secondary owners 
-			owner = self.addOwner(owner)
-			self.comm.insert(owner, 'owner')
 			another = input('Would you like to add another owner? (y or n)')
 			if (another == 'n'):
 				break
+			# deal with primary and secondary owners 
+			owner = self.addOwner(owner, 1)
+			self.comm.insert(owner, 'owner')
+
 
 		print("Auto transaction #" + auto_sale['transaction_id'] + " successfully registered.")
 
@@ -340,7 +345,7 @@ class App:
 		
 		while(True):
 			# deal with primary and secondary owners 
-			owner = self.addOwner(owner)
+			owner = self.addOwner(owner, 0)
 			self.comm.insert(owner, 'owner')
 			another = input('Would you like to add another owner? (y or n)')
 			if (another == 'n'):
