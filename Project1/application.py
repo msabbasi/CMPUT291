@@ -115,6 +115,17 @@ class App:
 			return False
 		else:
 			return True
+
+	def checkVehicleReg(self, serialNo):
+		curs = self.comm.connection.cursor()
+		check = "SELECT * FROM vehicle v WHERE v.serial_no = '" + serialNo + "'"
+		curs.execute(check)
+		row = curs.fetchall()
+		curs.close()
+		if (len(row) == 0):
+			return False
+		else:
+			return True
 			
 	# function to deal with primary/secondary owners 
 	def primaryOwn(self):
@@ -127,6 +138,15 @@ class App:
 	def autoTransaction(self):
 		auto_sale = {}
 
+		vehicle_id = input("Vehicle serial #: ")
+		while( len(vehicle_id) > 15 or vehicle_id == "" ):
+			print("The serial number that you entered is invalid. Please try again.")
+			vehicle_id = input("Vehicle serial #: ")
+		auto_sale['vehicle_id'] = vehicle_id
+		if not self.checkVehicleReg(vehicle_id):
+			print("This vehicle is not registered. Please register the vehicle first.")
+			return
+
 		seller_id = input("SIN of the seller: ")
 		while( len(seller_id) > 15 or seller_id == "" ):
 			print("The SIN that you entered is invalid. Please try again.")
@@ -135,6 +155,12 @@ class App:
 			print("Person with the SIN entered not in system. Please register person:")
 			self.regPerson(seller_id)
 		auto_sale['seller_id'] = seller_id
+
+		# Need to check primary owner.
+		if not self.CheckSeller(seller_id, vehicle_id): 
+			print("The person who tries to sell the vehicle is not primary owner")
+			print("Please, try auto transaction with the primary owner of the vehicle")
+			autoTransaction()
 
 		buyer_id = input("SIN of the buyer: ")
 		while( len(buyer_id) > 15 or buyer_id == "" ):
@@ -145,25 +171,6 @@ class App:
 			self.regPerson(buyer_id)
 		auto_sale['buyer_id'] = buyer_id
 
-		checkVReg = input("Is the vehicle registered? (y/n)  ")
-		if (checkVReg == 'n'):
-			vehicle_id = vehicleReg()
-		else:
-			vehicle_id = input("Vehicle serial #: ")
-			while( len(vehicle_id) > 15 or vehicle_id == "" ):
-				print("The serial number that you entered is invalid. Please try again.")
-				vehicle_id = input("Vehicle serial #: ")
-		auto_sale['vehicle_id'] = vehicle_id
-		#TODO: Check if vehicle exists
-
-		#TODO: Check if seller is primary owner
-		if not self.CheckSeller(seller_id, vehicle_id): #Need to check primary owner. I added owner dict in vehicle registration.
-			print("The person who tries to sell the vechicle is not primary owner")
-			print("Please, try auto transaction with the primary owner of the vehicle")
-			#del auto_sale['seller_id'] #I added these codes but I'm not sure about them.  
-			#del auto_sale['buyer_id']
-			#del auto_sale['vehicle_id']
-			#autoTransaction()
 
 		saleDate = input("Date of the transaction (dd-mm-yyyy): ")
 		auto_sale['s_date'] = parse(saleDate, dayfirst=True) 
