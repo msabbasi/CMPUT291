@@ -93,6 +93,17 @@ class App:
 			return False
 		else:
 			return True
+	
+	def CheckDriverLicence(self, licence_no):
+		curs = self.comm.connection.cursor()
+		check = "SELECT * FROM driver_licence dl WHERE dl.licence_no = '" + licence_no + "'"
+		curs.execute(check)
+		row = curs.fetchall()
+		curs.close()
+		if (len(row) == 0):
+			return True
+		else:
+			return False 
  
 	def checkPersonReg(self, sin):
 		curs = self.comm.connection.cursor()
@@ -104,6 +115,14 @@ class App:
 			return False
 		else:
 			return True
+			
+	# function to deal with primary/secondary owners 
+	def primaryOwn(self):
+		prim_own = input("Are they a primary owner('y' or 'n'):")
+		while( prim_own != 'y' or prim_own != 'n'):
+			print("Invalid input. Please try again.")
+			prim_own = input("Are they a primary owner('y' or 'n'):")
+		return prim_own
 	
 	def autoTransaction(self):
 		auto_sale = {}
@@ -135,7 +154,9 @@ class App:
 				print("The serial number that you entered is invalid. Please try again.")
 				vehicle_id = input("Vehicle serial #: ")
 		auto_sale['vehicle_id'] = vehicle_id
-		#TODO: Check if exists
+		#TODO: Check if vehicle exists
+
+		#TODO: Check if seller is primary owner
 		if not self.CheckSeller(seller_id, vehicle_id): #Need to check primary owner. I added owner dict in vehicle registration.
 			print("The person who tries to sell the vechicle is not primary owner")
 			print("Please, try auto transaction with the primary owner of the vehicle")
@@ -161,30 +182,33 @@ class App:
 	def driverLicenceReg(self):
 		driver_licence = {}
 		licence_no = input("Please enter Licence Number:")
-		while( len(licence_no)>15 or license_no == ""): #If licence no has more than 15 character and does not entered anything
+		while( len(licence_no)>15 or licence_no == ""): #If licence no has more than 15 character and does not entered anything
 			print("The licence number that you entered is invalid. Please try again.")
 			licence_no = input("Please enter Licence Number:")
-		diver_licence['licence_no'] = licence_no
-		sin = input("Please enter Social Insurance Number:")
-		while( len(sin) > 15 or sin == "" ):
+		if not self.CheckDriverLicence(licence_no): #Check if the licence number is in the system
+	                print("The licence number that you entered is already in the system.")
+			driverLicenceReg()
+		driver_licence['licence_no'] = licence_no #Add the licence number in the dictionary
+		sin = input("Please enter Social Insurance Number:") #Ask sin
+		while( len(sin) > 15 or sin == "" ): #Check the sin is valid or not
 			print("The Social Insurance Number that you entered is invalid. Please try again.")
 			sin = input("Please enter Social Insurance Number:")
-		if not self.checkPersonReg(sin):
+		if not self.checkPersonReg(sin): #If the person is not registered, register the person first of all
 			regPerson(sin)
-		driver_licence['sin'] = sin
+		driver_licence['sin'] = sin #Add sin to dictionary
 		licence_class = input("Please enter Licence Class:")
-		while ( len(licence_class)>10 or licence_no == ""):
+		while ( len(licence_class)>10 or licence_no == ""): #Check if the licence class is valid or not
 			print ("The Licence Class that you entered is invalid. Please try again.")
 			licence_class = input("Please enter Licence Class:")
-		driver_licence['class'] = licence_class 
+		driver_licence['class'] = licence_class  #Add licence class to the dictionary
 		photo_name = input("Please insert photo for licence (Optional) :")
 		issuing_date = ("Please enter issuing date of the licence in MM-DD-YYYY format:")
-		while ( is_date_valid(issuing_date) == False): #I need to check if it is in MM-DD-YYYY format
+		while ( is_date_valid(issuing_date) == False): #check if it is in MM-DD-YYYY format
 			print ("Issuing Date that you entered is invalid. Please try again.")
 			issuing_date = ("Please enter issuing date of the licence in MM-DD-YYYY format:")
 		driver_licence['issuing_date'] = issuing_date
 		expiring_date = ("Please enter expiring date of the licence in MM-DD-YYYY format:")
-		while ( is_date_valid(expiring_date) == False ): #I need to check if it is in MM-DD-YYYY format
+		while ( is_date_valid(expiring_date) == False ): #check if it is in MM-DD-YYYY format
 			print ("Expiring Date that you entered is invalid. Please try again.")
 			expiring_date = ("Please enter expiring date of the licence in MM-DD-YYYY format:")
 		driver_licence['expiring_date'] = expiring_date
@@ -207,60 +231,67 @@ class App:
 
 	# get info for new vehicle registration 
 	def vehicleReg(self):
-
 		vehicle = {}
 		owner = {}
-		
+		# create new serial number and store in vehicle dict
 		serial_no =  self.comm.getNewID('vehicle', 'serial_no')
-
 		vehicle['serial_no'] = serial_no
-		
-		maker = input("Please enter the make of the vehicle:")
-		while( len(maker) > 20 or maker == ""): #if maker is invalid
-			print("The make that you have entered is invalid. Please try again.")
-			maker = input("Please enter the make of the vehicle:")
-		vehicle['maker'] = maker
-
-		model = input("Please enter the model of the vehicle:")
-		while( len(model) > 20 or model == ""): #if model is invalid
-			print("The model that you have entered is invalid. Please try again.")
-			model = input("Please enter the model of the vehicle:")
-		vehicle['model'] = model
-
-		year = int(input("Please enter the year of the vehicle:"))
-		while( year > 9999 or year < 1): #if year is not between 1-4 digits 
-			print("The year that you have entered is invalid. Please try again.")
-			year = int(input("Please enter the year of the vehicle:"))
-		vehicle['year'] = year
-
-		color = input("Please enter the color of the vehicle:")
-		while( len(color) > 10 or color == ""): # if color is invalid
-			print("The color that you have entered is invalid. Please try again.")
-			color = input("Please enter the color of the vehicle:")
-		vehicle['color'] = color
-	
-		type_id = int(input("Please enter the type_id:"))
-		while( type(type_id) != int): # type_id not an integer
-			print("The type_id is invalid. Please try again.")
-			type_id = int(input("Please enter the type_id:"))
-		vehicle['type_id'] = type_id
 		
 		owner['vehicle_id'] = serial_no
 		owner_id = input("Please enter the persons sin number:")
 		while( len(owner_id) > 15 or owner_id == ""): # if sin is invalid
 			print("The sin is invalid. Please try again.")
 			owner_id = input("Please enter the persons sin number:")
+		# need to check if person is in database 
+		if (checkPersonReg(owner_id) == True):
+			# if returns true we are ok 
+			pass
+		# else need to add them to database first 
+		else:
+			regPerson(owner_id)
+		# store their sin in our owner dict 
 		owner['owner_id'] = owner_id
-
-		prim_own = input("Are they a primary owner('y' or 'n'):")
-		while( prim_own != 'y' or prim_own != 'n'):
-			print("Invalid input. Please try again.")
-			prim_own = input("Are they a primary owner('y' or 'n'):")
+		
+		# deal with primary and secondary owners 
+		primaryOwner()
 		owner['is_primary_owner'] = prim_own
-
+		
+		# get vehicle make 
+		maker = input("Please enter the make of the vehicle:")
+		while( len(maker) > 20 or maker == ""): #if maker is invalid
+			print("The make that you have entered is invalid. Please try again.")
+			maker = input("Please enter the make of the vehicle:")
+		vehicle['maker'] = maker
+		# get vehicle model
+		model = input("Please enter the model of the vehicle:")
+		while( len(model) > 20 or model == ""): #if model is invalid
+			print("The model that you have entered is invalid. Please try again.")
+			model = input("Please enter the model of the vehicle:")
+		vehicle['model'] = model
+		# get vehicle year
+		year = int(input("Please enter the year of the vehicle:"))
+		while( year > 9999 or year < 1): #if year is not between 1-4 digits 
+			print("The year that you have entered is invalid. Please try again.")
+			year = int(input("Please enter the year of the vehicle:"))
+		vehicle['year'] = year
+		# get vehicle color 
+		color = input("Please enter the color of the vehicle:")
+		while( len(color) > 10 or color == ""): # if color is invalid
+			print("The color that you have entered is invalid. Please try again.")
+			color = input("Please enter the color of the vehicle:")
+		vehicle['color'] = color
+		# get vehicle type_id
+		# should we have function to look and find the type_id?
+		type_id = int(input("Please enter the type_id:"))
+		while( type(type_id) != int): # type_id not an integer
+			print("The type_id is invalid. Please try again.")
+			type_id = int(input("Please enter the type_id:"))
+		vehicle['type_id'] = type_id
+		
+		# finally add the vehicle and owner to database
 		self.comm.insert(vehicle, 'vehicle')
 		self.comm.insert(owner, 'owner')
-	
+			
 	def violationRec(self):
 		
 		#TODO: Better error handling
@@ -276,6 +307,8 @@ class App:
 			print("The SIN that you entered is invalid. Please try again.")
 			temp = input("SIN of the violator: ")
 		ticket['violator_no'] = temp
+
+		#TODO: Check if person exists
 
 		temp = input("Serial # of the vehicle involved: ")
 		while( len(temp) > 15 or temp == "" ):
@@ -345,4 +378,3 @@ class App:
 				break
 
 			self.comm.search(choice, term)
-
