@@ -315,6 +315,9 @@ class App:
 			# deal with primary and secondary owners 
 			owner = primaryOwner(owner)
 			self.comm.insert(owner, 'owner')
+			another = input('Would you like to add another owner? (y or n)
+			if (another == 'n'):
+				break
 			
 	def violationRec(self):
 		
