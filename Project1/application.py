@@ -207,7 +207,6 @@ class App:
 
 	# get info for new vehicle registration 
 	def vehicleReg(self):
-
 		vehicle = {}
 		owner = {}
 		# create new serial number and store in vehicle dict
