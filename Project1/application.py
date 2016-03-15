@@ -93,6 +93,17 @@ class App:
 			return False
 		else:
 			return True
+	
+	def CheckDriverLicence(self, licence_no):
+		curs = self.comm.connection.cursor()
+		check = "SELECT * FROM driver_licence dl WHERE dl.licence_no = '" + licence_no + "'"
+		curs.execute(check)
+		row = curs.fetchall()
+		curs.close()
+		if (len(row) == 0):
+			return True
+		else:
+			return False 
  
 	def checkPersonReg(self, sin):
 		curs = self.comm.connection.cursor()
@@ -160,6 +171,7 @@ class App:
 			self.regPerson(buyer_id)
 		auto_sale['buyer_id'] = buyer_id
 
+
 		saleDate = input("Date of the transaction (dd-mm-yyyy): ")
 		auto_sale['s_date'] = parse(saleDate, dayfirst=True) 
 
@@ -177,30 +189,33 @@ class App:
 	def driverLicenceReg(self):
 		driver_licence = {}
 		licence_no = input("Please enter Licence Number:")
-		while( len(licence_no)>15 or license_no == ""): #If licence no has more than 15 character and does not entered anything
+		while( len(licence_no)>15 or licence_no == ""): #If licence no has more than 15 character and does not entered anything
 			print("The licence number that you entered is invalid. Please try again.")
 			licence_no = input("Please enter Licence Number:")
-		diver_licence['licence_no'] = licence_no
-		sin = input("Please enter Social Insurance Number:")
-		while( len(sin) > 15 or sin == "" ):
+		if not self.CheckDriverLicence(licence_no): #Check if the licence number is in the system
+	                print("The licence number that you entered is already in the system.")
+			driverLicenceReg()
+		driver_licence['licence_no'] = licence_no #Add the licence number in the dictionary
+		sin = input("Please enter Social Insurance Number:") #Ask sin
+		while( len(sin) > 15 or sin == "" ): #Check the sin is valid or not
 			print("The Social Insurance Number that you entered is invalid. Please try again.")
 			sin = input("Please enter Social Insurance Number:")
-		if not self.checkPersonReg(sin):
+		if not self.checkPersonReg(sin): #If the person is not registered, register the person first of all
 			regPerson(sin)
-		driver_licence['sin'] = sin
+		driver_licence['sin'] = sin #Add sin to dictionary
 		licence_class = input("Please enter Licence Class:")
-		while ( len(licence_class)>10 or licence_no == ""):
+		while ( len(licence_class)>10 or licence_no == ""): #Check if the licence class is valid or not
 			print ("The Licence Class that you entered is invalid. Please try again.")
 			licence_class = input("Please enter Licence Class:")
-		driver_licence['class'] = licence_class 
+		driver_licence['class'] = licence_class  #Add licence class to the dictionary
 		photo_name = input("Please insert photo for licence (Optional) :")
 		issuing_date = ("Please enter issuing date of the licence in MM-DD-YYYY format:")
-		while ( is_date_valid(issuing_date) == False): #I need to check if it is in MM-DD-YYYY format
+		while ( is_date_valid(issuing_date) == False): #check if it is in MM-DD-YYYY format
 			print ("Issuing Date that you entered is invalid. Please try again.")
 			issuing_date = ("Please enter issuing date of the licence in MM-DD-YYYY format:")
 		driver_licence['issuing_date'] = issuing_date
 		expiring_date = ("Please enter expiring date of the licence in MM-DD-YYYY format:")
-		while ( is_date_valid(expiring_date) == False ): #I need to check if it is in MM-DD-YYYY format
+		while ( is_date_valid(expiring_date) == False ): #check if it is in MM-DD-YYYY format
 			print ("Expiring Date that you entered is invalid. Please try again.")
 			expiring_date = ("Please enter expiring date of the licence in MM-DD-YYYY format:")
 		driver_licence['expiring_date'] = expiring_date
@@ -370,4 +385,3 @@ class App:
 				break
 
 			self.comm.search(choice, term)
-
