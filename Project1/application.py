@@ -115,10 +115,11 @@ class App:
 			return False
 		else:
 			return True
-
-	def checkVehicleReg(self, serialNo):
+	
+	# check if vehicle is in system 
+	def checkVehicleReg(self, serial_no):
 		curs = self.comm.connection.cursor()
-		check = "SELECT * FROM vehicle v WHERE v.serial_no = '" + serialNo + "'"
+		check = "SELECT * FROM vehicle v WHERE v.serial_no = '" + serial_no + "'"
 		curs.execute(check)
 		row = curs.fetchall()
 		curs.close()
@@ -128,12 +129,30 @@ class App:
 			return True
 			
 	# function to deal with primary/secondary owners 
-	def primaryOwn(self):
+	def primaryOwn(self, owner):
+		# get owner_id
+		owner_id = input("Please enter the persons sin number:")
+		while( len(owner_id) > 15 or owner_id == ""): # if sin is invalid
+			print("The sin is invalid. Please try again.")
+			owner_id = input("Please enter the persons sin number:")
+		# need to check if person is in database 
+		if (checkPersonReg(owner_id) == True):
+			# if returns true we are ok 
+			pass
+		# else need to add them to database first 
+		else:
+			regPerson(owner_id)
+		# add their sin to our dict
+		owner['owner_id'] = owner_id
+		# is primary owner?
 		prim_own = input("Are they a primary owner('y' or 'n'):")
 		while( prim_own != 'y' or prim_own != 'n'):
 			print("Invalid input. Please try again.")
 			prim_own = input("Are they a primary owner('y' or 'n'):")
-		return prim_own
+		# add response to our dict	
+		owner['is_primary_owner'] = prim_own
+		
+		return owner
 	
 	def autoTransaction(self):
 		auto_sale = {}
@@ -236,33 +255,24 @@ class App:
 			print( sys.stderr, "Oracle message:", error.message)
 		
 
-	# get info for new vehicle registration 
+		# get info for new vehicle registration 
 	def vehicleReg(self):
 		vehicle = {}
-		owner = {}
-		# create new serial number and store in vehicle dict
-		serial_no =  self.comm.getNewID('vehicle', 'serial_no')
+		
+		# get vehicle serial_no
+		serial_no = input("Please enter the serial number of the vehicle:")
+		while( len(serial_no) > 15 or serial_no == ""): #if serial_no is invalid
+			print("The serial number that you have entered is invalid. Please try again.")
+			serial_no = input("Please enter the serial number of the vehicle:")
 		vehicle['serial_no'] = serial_no
-		
-		owner['vehicle_id'] = serial_no
-		owner_id = input("Please enter the persons sin number:")
-		while( len(owner_id) > 15 or owner_id == ""): # if sin is invalid
-			print("The sin is invalid. Please try again.")
-			owner_id = input("Please enter the persons sin number:")
-		# need to check if person is in database 
-		if (checkPersonReg(owner_id) == True):
-			# if returns true we are ok 
+		# need to check if vehicle is in database 
+		if (checkVehicleReg(serial_no) == False):
+			# if returns false we are ok 
 			pass
-		# else need to add them to database first 
+		# else display corect error message 
 		else:
-			regPerson(owner_id)
-		# store their sin in our owner dict 
-		owner['owner_id'] = owner_id
-		
-		# deal with primary and secondary owners 
-		primaryOwner()
-		owner['is_primary_owner'] = prim_own
-		
+			print("serial number already in the system!")
+			return 
 		# get vehicle make 
 		maker = input("Please enter the make of the vehicle:")
 		while( len(maker) > 20 or maker == ""): #if maker is invalid
@@ -295,9 +305,16 @@ class App:
 			type_id = int(input("Please enter the type_id:"))
 		vehicle['type_id'] = type_id
 		
-		# finally add the vehicle and owner to database
-		self.comm.insert(vehicle, 'vehicle')
-		self.comm.insert(owner, 'owner')
+		# add the vehicle to database
+		self.comm.insert(vehicle, 'vehicle')		
+		
+		owner = {}
+		owner['vehicle_id'] = serial_no
+		
+		while(True):
+			# deal with primary and secondary owners 
+			owner = primaryOwner(owner)
+			self.comm.insert(owner, 'owner')
 			
 	def violationRec(self):
 		
