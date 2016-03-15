@@ -135,7 +135,9 @@ class App:
 				print("The serial number that you entered is invalid. Please try again.")
 				vehicle_id = input("Vehicle serial #: ")
 		auto_sale['vehicle_id'] = vehicle_id
-		#TODO: Check if exists
+		#TODO: Check if vehicle exists
+
+		#TODO: Check if seller is primary owner
 		if not self.CheckSeller(seller_id, vehicle_id): #Need to check primary owner. I added owner dict in vehicle registration.
 			print("The person who tries to sell the vechicle is not primary owner")
 			print("Please, try auto transaction with the primary owner of the vehicle")
@@ -289,6 +291,8 @@ class App:
 			print("The SIN that you entered is invalid. Please try again.")
 			temp = input("SIN of the violator: ")
 		ticket['violator_no'] = temp
+
+		#TODO: Check if person exists
 
 		temp = input("Serial # of the vehicle involved: ")
 		while( len(temp) > 15 or temp == "" ):
