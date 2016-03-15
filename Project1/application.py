@@ -89,7 +89,7 @@ class App:
 		curs.execute(check)
 		row = curs.fetchall()
 		curs.close()
-		if (len(row)) == 0):
+		if (len(row) == 0):
 			return False
 		else:
 			return True
@@ -177,10 +177,10 @@ class App:
 	def driverLicenceReg(self):
 		driver_licence = {}
 		licence_no = input("Please enter Licence Number:")
-		while( len(licence_no)>15 or license_no == ""): #If licence no has more than 15 character and does not entered anything
+		while( len(licence_no)>15 or licence_no == ""): #If licence no has more than 15 character and does not entered anything
 			print("The licence number that you entered is invalid. Please try again.")
 			licence_no = input("Please enter Licence Number:")
-		diver_licence['licence_no'] = licence_no
+		driver_licence['licence_no'] = licence_no
 		sin = input("Please enter Social Insurance Number:")
 		while( len(sin) > 15 or sin == "" ):
 			print("The Social Insurance Number that you entered is invalid. Please try again.")
