@@ -106,6 +106,17 @@ class App:
 			return True
 		else:
 			return False 
+
+	def CheckIfPersonHasLicence(self, licence_no, sin):
+		curs = self.comm.connection.cursor()
+		check = "SELECT * FROM driver_licence dl WHERE dl.licence_no = '" + licence_no + "' AND dl.sin = '" + sin "'"
+		curs.execute(check)
+		row = curs.fetchall()
+		curs.close()
+		if (len(row) == 0):
+			return True
+		else:
+			return False 
  
 	def checkPersonReg(self, sin):
 		curs = self.comm.connection.cursor()
