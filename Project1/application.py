@@ -63,6 +63,8 @@ class App:
 
 	def regPerson(self, sin):
 
+		print("This person is not registered. Please provide the following information.")
+
 		people = {}
 		people['sin'] = sin
 		people['name'] = input("Name: ")
@@ -108,17 +110,15 @@ class App:
 			return False 
 
 	def CheckIfPersonHasLicence(self, sin):
-                curs = self.comm.connection.cursor()
-                check = "SELECT * FROM drive_licence dl WHERE dl.sin = '" + sin + "'"
-                print(check)
-                curs.execute(check)
-                row = curs.fetchall()
-                curs.close()
-                if (len(row) == 0):
-                        return True
-                else:
-                        return False
-
+		curs = self.comm.connection.cursor()
+		check = "SELECT * FROM driver_licence dl WHERE dl.sin = '" + sin "'"
+		curs.execute(check)
+		row = curs.fetchall()
+		curs.close()
+		if (len(row) == 0):
+			return True
+		else:
+			return False 
  
 	def checkPersonReg(self, sin):
 		curs = self.comm.connection.cursor()
@@ -130,10 +130,11 @@ class App:
 			return False
 		else:
 			return True
-
-	def checkVehicleReg(self, serialNo):
+	
+	# check if vehicle is in system 
+	def checkVehicleReg(self, serial_no):
 		curs = self.comm.connection.cursor()
-		check = "SELECT * FROM vehicle v WHERE v.serial_no = '" + serialNo + "'"
+		check = "SELECT * FROM vehicle v WHERE v.serial_no = '" + serial_no + "'"
 		curs.execute(check)
 		row = curs.fetchall()
 		curs.close()
@@ -143,13 +144,44 @@ class App:
 			return True
 			
 	# function to deal with primary/secondary owners 
-	def primaryOwn(self):
-		prim_own = input("Are they a primary owner('y' or 'n'):")
-		while( prim_own != 'y' or prim_own != 'n'):
-			print("Invalid input. Please try again.")
+	def addOwner(self, owner, mode):
+		# get owner_id
+		owner_id = input("Please enter the person's sin number:")
+		while( len(owner_id) > 15 or owner_id == ""): # if sin is invalid
+			print("The sin is invalid. Please try again.")
+			owner_id = input("Please enter the persons sin number:")
+		# need to check if person is in database 
+		if (self.checkPersonReg(owner_id) == True):
+			# if returns true we are ok 
+			pass
+		# else need to add them to database first 
+		else:
+			self.regPerson(owner_id)
+		# add their sin to our dict
+		owner['owner_id'] = owner_id
+		if (mode == 0):
+			# is primary owner?
 			prim_own = input("Are they a primary owner('y' or 'n'):")
-		return prim_own
+			while( prim_own != 'y' and prim_own != 'n'):
+				print("Invalid input. Please try again.")
+				prim_own = input("Are they a primary owner('y' or 'n'):")
+			# add response to our dict	
+			owner['is_primary_owner'] = prim_own	
 	
+		return owner
+	
+	def removePrevOwners(self, serial_no):
+		curs = self.comm.connection.cursor()
+		check = "DELETE FROM owner o WHERE o.vehicle_id = '" + serial_no + "'"
+		curs.execute(check)
+		row = curs.fetchall()
+		curs.close()
+		if (len(row) == 0):
+			return False
+		else:
+			return True
+
+
 	def autoTransaction(self):
 		auto_sale = {}
 
@@ -196,7 +228,24 @@ class App:
 
 		self.comm.insert(auto_sale, 'auto_sale')
 
-		#TODO: Remove prev ownership
+		removePrevOwners(vehicle_id)
+
+
+		owner = {}
+		owner['vehicle_id'] = serial_no
+		owner['owner_id'] = buyer_id
+		owner['is_primary_owner'] = 'y'
+				
+		self.comm.insert(owner, 'owner')
+
+		while(True):
+			another = input('Would you like to add another owner? (y or n)')
+			if (another == 'n'):
+				break
+			# deal with primary and secondary owners 
+			owner = self.addOwner(owner, 1)
+			self.comm.insert(owner, 'owner')
+
 
 		print("Auto transaction #" + auto_sale['transaction_id'] + " successfully registered.")
 
@@ -207,9 +256,9 @@ class App:
 		while( len(licence_no)>15 or licence_no == ""): #If licence no has more than 15 character and does not entered anything
 			print("The licence number that you entered is invalid. Please try again.")
 			licence_no = input("Please enter Licence Number:")
-		if not self.CheckDriverLicence(licence_no): #Check if the licence number is in the syst
+		if not self.CheckDriverLicence(licence_no): #Check if the licence number is in the system
 			print("The licence number that you entered is already in the system.")
-			return
+			driverLicenceReg()
 		driver_licence['licence_no'] = licence_no #Add the licence number in the dictionary
 		sin = input("Please enter Social Insurance Number:") #Ask sin
 		while( len(sin) > 15 or sin == "" ): #Check the sin is valid or not
@@ -254,33 +303,24 @@ class App:
 			print( sys.stderr, "Oracle message:", error.message)
 		
 
-	# get info for new vehicle registration 
+		# get info for new vehicle registration 
 	def vehicleReg(self):
 		vehicle = {}
-		owner = {}
-		# create new serial number and store in vehicle dict
-		serial_no =  self.comm.getNewID('vehicle', 'serial_no')
+		
+		# get vehicle serial_no
+		serial_no = input("Please enter the serial number of the vehicle:")
+		while( len(serial_no) > 15 or serial_no == ""): #if serial_no is invalid
+			print("The serial number that you have entered is invalid. Please try again.")
+			serial_no = input("Please enter the serial number of the vehicle:")
 		vehicle['serial_no'] = serial_no
-		
-		owner['vehicle_id'] = serial_no
-		owner_id = input("Please enter the persons sin number:")
-		while( len(owner_id) > 15 or owner_id == ""): # if sin is invalid
-			print("The sin is invalid. Please try again.")
-			owner_id = input("Please enter the persons sin number:")
-		# need to check if person is in database 
-		if (checkPersonReg(owner_id) == True):
-			# if returns true we are ok 
+		# need to check if vehicle is in database 
+		if (self.checkVehicleReg(serial_no) == False):
+			# if returns false we are ok 
 			pass
-		# else need to add them to database first 
+		# else display corect error message 
 		else:
-			regPerson(owner_id)
-		# store their sin in our owner dict 
-		owner['owner_id'] = owner_id
-		
-		# deal with primary and secondary owners 
-		primaryOwner()
-		owner['is_primary_owner'] = prim_own
-		
+			print("serial number already in the system!")
+			return 
 		# get vehicle make 
 		maker = input("Please enter the make of the vehicle:")
 		while( len(maker) > 20 or maker == ""): #if maker is invalid
@@ -313,9 +353,19 @@ class App:
 			type_id = int(input("Please enter the type_id:"))
 		vehicle['type_id'] = type_id
 		
-		# finally add the vehicle and owner to database
-		self.comm.insert(vehicle, 'vehicle')
-		self.comm.insert(owner, 'owner')
+		# add the vehicle to database
+		self.comm.insert(vehicle, 'vehicle')		
+		
+		owner = {}
+		owner['vehicle_id'] = serial_no
+		
+		while(True):
+			# deal with primary and secondary owners 
+			owner = self.addOwner(owner, 0)
+			self.comm.insert(owner, 'owner')
+			another = input('Would you like to add another owner? (y or n)')
+			if (another == 'n'):
+				break
 			
 	def violationRec(self):
 		
