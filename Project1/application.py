@@ -1,4 +1,5 @@
 from dateutil.parser import *
+from datetime import date,datetime
 
 class App:
 	
@@ -51,7 +52,7 @@ class App:
 		else:
 			return True
 
-	def is_date_valid(date):
+	def is_date_valid(self, date):
 		correctDate = None
 		try:
 			this_date = datetime.strptime(date, '%m-%d-%Y')
@@ -89,14 +90,15 @@ class App:
 		curs.execute(check)
 		row = curs.fetchall()
 		curs.close()
-		if (len(row)) == 0):
+		if (len(row) == 0):
 			return False
 		else:
 			return True
 	
 	def CheckDriverLicence(self, licence_no):
 		curs = self.comm.connection.cursor()
-		check = "SELECT * FROM driver_licence dl WHERE dl.licence_no = '" + licence_no + "'"
+		check = "SELECT * FROM drive_licence dl WHERE dl.licence_no = '" + licence_no + "'"
+		print(check)
 		curs.execute(check)
 		row = curs.fetchall()
 		curs.close()
@@ -104,10 +106,34 @@ class App:
 			return True
 		else:
 			return False 
+
+	def CheckIfPersonHasLicence(self, sin):
+                curs = self.comm.connection.cursor()
+                check = "SELECT * FROM drive_licence dl WHERE dl.sin = '" + sin + "'"
+                print(check)
+                curs.execute(check)
+                row = curs.fetchall()
+                curs.close()
+                if (len(row) == 0):
+                        return True
+                else:
+                        return False
+
  
 	def checkPersonReg(self, sin):
 		curs = self.comm.connection.cursor()
 		check = "SELECT * FROM people p WHERE p.sin = '" + sin + "'"
+		curs.execute(check)
+		row = curs.fetchall()
+		curs.close()
+		if (len(row) == 0):
+			return False
+		else:
+			return True
+
+	def checkVehicleReg(self, serialNo):
+		curs = self.comm.connection.cursor()
+		check = "SELECT * FROM vehicle v WHERE v.serial_no = '" + serialNo + "'"
 		curs.execute(check)
 		row = curs.fetchall()
 		curs.close()
@@ -127,6 +153,15 @@ class App:
 	def autoTransaction(self):
 		auto_sale = {}
 
+		vehicle_id = input("Vehicle serial #: ")
+		while( len(vehicle_id) > 15 or vehicle_id == "" ):
+			print("The serial number that you entered is invalid. Please try again.")
+			vehicle_id = input("Vehicle serial #: ")
+		auto_sale['vehicle_id'] = vehicle_id
+		if not self.checkVehicleReg(vehicle_id):
+			print("This vehicle is not registered. Please register the vehicle first.")
+			return
+
 		seller_id = input("SIN of the seller: ")
 		while( len(seller_id) > 15 or seller_id == "" ):
 			print("The SIN that you entered is invalid. Please try again.")
@@ -135,6 +170,12 @@ class App:
 			print("Person with the SIN entered not in system. Please register person:")
 			self.regPerson(seller_id)
 		auto_sale['seller_id'] = seller_id
+
+		# Need to check primary owner.
+		if not self.CheckSeller(seller_id, vehicle_id): 
+			print("The person who tries to sell the vehicle is not primary owner")
+			print("Please, try auto transaction with the primary owner of the vehicle")
+			autoTransaction()
 
 		buyer_id = input("SIN of the buyer: ")
 		while( len(buyer_id) > 15 or buyer_id == "" ):
@@ -145,25 +186,6 @@ class App:
 			self.regPerson(buyer_id)
 		auto_sale['buyer_id'] = buyer_id
 
-		checkVReg = input("Is the vehicle registered? (y/n)  ")
-		if (checkVReg == 'n'):
-			vehicle_id = vehicleReg()
-		else:
-			vehicle_id = input("Vehicle serial #: ")
-			while( len(vehicle_id) > 15 or vehicle_id == "" ):
-				print("The serial number that you entered is invalid. Please try again.")
-				vehicle_id = input("Vehicle serial #: ")
-		auto_sale['vehicle_id'] = vehicle_id
-		#TODO: Check if vehicle exists
-
-		#TODO: Check if seller is primary owner
-		if not self.CheckSeller(seller_id, vehicle_id): #Need to check primary owner. I added owner dict in vehicle registration.
-			print("The person who tries to sell the vechicle is not primary owner")
-			print("Please, try auto transaction with the primary owner of the vehicle")
-			#del auto_sale['seller_id'] #I added these codes but I'm not sure about them.  
-			#del auto_sale['buyer_id']
-			#del auto_sale['vehicle_id']
-			#autoTransaction()
 
 		saleDate = input("Date of the transaction (dd-mm-yyyy): ")
 		auto_sale['s_date'] = parse(saleDate, dayfirst=True) 
@@ -185,16 +207,19 @@ class App:
 		while( len(licence_no)>15 or licence_no == ""): #If licence no has more than 15 character and does not entered anything
 			print("The licence number that you entered is invalid. Please try again.")
 			licence_no = input("Please enter Licence Number:")
-		if not self.CheckDriverLicence(licence_no): #Check if the licence number is in the system
-	                print("The licence number that you entered is already in the system.")
-			driverLicenceReg()
+		if not self.CheckDriverLicence(licence_no): #Check if the licence number is in the syst
+			print("The licence number that you entered is already in the system.")
+			return
 		driver_licence['licence_no'] = licence_no #Add the licence number in the dictionary
 		sin = input("Please enter Social Insurance Number:") #Ask sin
 		while( len(sin) > 15 or sin == "" ): #Check the sin is valid or not
 			print("The Social Insurance Number that you entered is invalid. Please try again.")
 			sin = input("Please enter Social Insurance Number:")
 		if not self.checkPersonReg(sin): #If the person is not registered, register the person first of all
-			regPerson(sin)
+			self.regPerson(sin)
+		if not self.CheckIfPersonHasLicence(sin):
+			print("The person already has a licence")
+			return
 		driver_licence['sin'] = sin #Add sin to dictionary
 		licence_class = input("Please enter Licence Class:")
 		while ( len(licence_class)>10 or licence_no == ""): #Check if the licence class is valid or not
@@ -202,16 +227,16 @@ class App:
 			licence_class = input("Please enter Licence Class:")
 		driver_licence['class'] = licence_class  #Add licence class to the dictionary
 		photo_name = input("Please insert photo for licence (Optional) :")
-		issuing_date = ("Please enter issuing date of the licence in MM-DD-YYYY format:")
-		while ( is_date_valid(issuing_date) == False): #check if it is in MM-DD-YYYY format
+		issuing_date = input("Please enter issuing date of the licence in MM-DD-YYYY format:")
+		while (self.is_date_valid(issuing_date) == False): #check if it is in MM-DD-YYYY format
 			print ("Issuing Date that you entered is invalid. Please try again.")
-			issuing_date = ("Please enter issuing date of the licence in MM-DD-YYYY format:")
-		driver_licence['issuing_date'] = issuing_date
-		expiring_date = ("Please enter expiring date of the licence in MM-DD-YYYY format:")
-		while ( is_date_valid(expiring_date) == False ): #check if it is in MM-DD-YYYY format
+			issuing_date = input("Please enter issuing date of the licence in MM-DD-YYYY format:")
+		driver_licence['issuing_date'] = parse(issuing_date, dayfirst = False)
+		expiring_date = input("Please enter expiring date of the licence in MM-DD-YYYY format:")
+		while (self.is_date_valid(expiring_date) == False ): #check if it is in MM-DD-YYYY format
 			print ("Expiring Date that you entered is invalid. Please try again.")
-			expiring_date = ("Please enter expiring date of the licence in MM-DD-YYYY format:")
-		driver_licence['expiring_date'] = expiring_date
+			expiring_date = input("Please enter expiring date of the licence in MM-DD-YYYY format:")
+		driver_licence['expiring_date'] = parse(expiring_date, dayfirst = False)
 		print("Wait, we are processing...")
 		try: 
 			if (photo_name == ""):
@@ -221,7 +246,7 @@ class App:
 				photo = f_photo.read()
 				driver_licence['photo'] = photo
 			
-			self.comm.insert(driver_licence, 'driver_licence')
+			self.comm.insert(driver_licence, 'drive_licence')
 			print("You registered the new driver licence!")
 		except cx_Oracle.DatabaseError as exc:
 			error=exc.args
