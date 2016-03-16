@@ -107,9 +107,9 @@ class App:
 		else:
 			return False 
 
-	def CheckIfPersonHasLicence(self, licence_no, sin):
+	def CheckIfPersonHasLicence(self, sin):
 		curs = self.comm.connection.cursor()
-		check = "SELECT * FROM driver_licence dl WHERE dl.licence_no = '" + licence_no + "' AND dl.sin = '" + sin "'"
+		check = "SELECT * FROM driver_licence dl WHERE dl.sin = '" + sin "'"
 		curs.execute(check)
 		row = curs.fetchall()
 		curs.close()
