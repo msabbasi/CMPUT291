@@ -1,4 +1,5 @@
 from dateutil.parser import *
+from datetime import date,datetime
 
 class App:
 	
@@ -51,7 +52,7 @@ class App:
 		else:
 			return True
 
-	def is_date_valid(date):
+	def is_date_valid(self, date):
 		correctDate = None
 		try:
 			this_date = datetime.strptime(date, '%m-%d-%Y')
@@ -98,7 +99,8 @@ class App:
 	
 	def CheckDriverLicence(self, licence_no):
 		curs = self.comm.connection.cursor()
-		check = "SELECT * FROM driver_licence dl WHERE dl.licence_no = '" + licence_no + "'"
+		check = "SELECT * FROM drive_licence dl WHERE dl.licence_no = '" + licence_no + "'"
+		print(check)
 		curs.execute(check)
 		row = curs.fetchall()
 		curs.close()
@@ -263,7 +265,10 @@ class App:
 			print("The Social Insurance Number that you entered is invalid. Please try again.")
 			sin = input("Please enter Social Insurance Number:")
 		if not self.checkPersonReg(sin): #If the person is not registered, register the person first of all
-			regPerson(sin)
+			self.regPerson(sin)
+		if not self.CheckIfPersonHasLicence(sin):
+			print("The person already has a licence")
+			return
 		driver_licence['sin'] = sin #Add sin to dictionary
 		licence_class = input("Please enter Licence Class:")
 		while ( len(licence_class)>10 or licence_no == ""): #Check if the licence class is valid or not
@@ -271,16 +276,16 @@ class App:
 			licence_class = input("Please enter Licence Class:")
 		driver_licence['class'] = licence_class  #Add licence class to the dictionary
 		photo_name = input("Please insert photo for licence (Optional) :")
-		issuing_date = ("Please enter issuing date of the licence in MM-DD-YYYY format:")
-		while ( is_date_valid(issuing_date) == False): #check if it is in MM-DD-YYYY format
+		issuing_date = input("Please enter issuing date of the licence in MM-DD-YYYY format:")
+		while (self.is_date_valid(issuing_date) == False): #check if it is in MM-DD-YYYY format
 			print ("Issuing Date that you entered is invalid. Please try again.")
-			issuing_date = ("Please enter issuing date of the licence in MM-DD-YYYY format:")
-		driver_licence['issuing_date'] = issuing_date
-		expiring_date = ("Please enter expiring date of the licence in MM-DD-YYYY format:")
-		while ( is_date_valid(expiring_date) == False ): #check if it is in MM-DD-YYYY format
+			issuing_date = input("Please enter issuing date of the licence in MM-DD-YYYY format:")
+		driver_licence['issuing_date'] = parse(issuing_date, dayfirst = False)
+		expiring_date = input("Please enter expiring date of the licence in MM-DD-YYYY format:")
+		while (self.is_date_valid(expiring_date) == False ): #check if it is in MM-DD-YYYY format
 			print ("Expiring Date that you entered is invalid. Please try again.")
-			expiring_date = ("Please enter expiring date of the licence in MM-DD-YYYY format:")
-		driver_licence['expiring_date'] = expiring_date
+			expiring_date = input("Please enter expiring date of the licence in MM-DD-YYYY format:")
+		driver_licence['expiring_date'] = parse(expiring_date, dayfirst = False)
 		print("Wait, we are processing...")
 		try: 
 			if (photo_name == ""):
@@ -290,7 +295,7 @@ class App:
 				photo = f_photo.read()
 				driver_licence['photo'] = photo
 			
-			self.comm.insert(driver_licence, 'driver_licence')
+			self.comm.insert(driver_licence, 'drive_licence')
 			print("You registered the new driver licence!")
 		except cx_Oracle.DatabaseError as exc:
 			error=exc.args
