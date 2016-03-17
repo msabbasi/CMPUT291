@@ -301,6 +301,9 @@ class App:
 			
 			self.comm.insert(driver_licence, 'drive_licence')
 			print("You registered the new driver licence!")
+		except IOError as io_err:
+			print("The photo that you are trying to upload does not exist.")
+			
 		except cx_Oracle.DatabaseError as exc:
 			error=exc.args
 			print( sys.stderr, "Oracle code:", error.code)
