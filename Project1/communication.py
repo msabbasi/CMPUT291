@@ -28,7 +28,7 @@ class Comm:
 				self.curs4 = self.connection.cursor()
 				self.curs4.prepare("SELECT t.*, tt.fine FROM people p, ticket t, ticket_type tt WHERE p.sin = :variable AND p.sin = t.violator_no AND t.vtype = tt.vtype")
 				self.curs5 = self.connection.cursor()
-				self.curs5.prepare("SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description, dl.expiring_date FROM people p, drive_licence dl, driving_condition dc, restriction r WHERE p.name = :variable AND p.sin = dl.sin AND dl.licence_no = r.licence_no AND r.r_id = dc.c_id")
+				self.curs5.prepare("SELECT count(DISTINCT transaction_id), avg(price), count(DISTINCT t.ticket_no) FROM vehicle h, auto_sale a, ticket t WHERE t.vehicle_id (+) = h.serial_no AND a.vehicle_id (+) = h.serial_no GROUP BY h.serial_no HAVING h.serial_no = :variable ")
 				
 			except cx_Oracle.DatabaseError as exc:
 				successful = False
