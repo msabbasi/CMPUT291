@@ -40,13 +40,16 @@ class Comm:
 					print("Sorry, there was a problem. Please try again.")
 
 	def insert(self, table, name):
+		photo = None
 		statement = 'insert into ' + name + '('
 		values = ' values('
 		for key in table:
 			statement+= key +', '
 			if key == 'photo':
-				self.curs.setinputsizes(image=cx_Oracle.BLOB)
-			if isinstance(table[key], str):
+				self.curs.setinputsizes(photo=cx_Oracle.BLOB)
+				photo = table[key]
+				values+= ":photo, "
+			elif isinstance(table[key], str):
 				values+= "'" + table[key] +"', "
 			elif isinstance(table[key], datetime):
 				values+= "date '" + table[key].strftime("%y-%m-%d") +"', "
@@ -56,8 +59,11 @@ class Comm:
 		values = values[:-2]
 		statement += ') ' + values + ')'
 
-		#print(statement)
-		self.curs.execute(statement)
+		print(statement)
+		if photo == None:
+			self.curs.execute(statement)
+		else:
+			self.curs.execute(statement, {'photo':photo})
 		self.connection.commit()
 
 	def getNewID(self, tableName, column):
@@ -72,7 +78,7 @@ class Comm:
 			ids = []
 
 			for row in rows:
-				ids.append(int(row[0]))
+				ids.append(row[0])
 
 			ids.sort()
 			return str(int(ids[len(ids)-1]) +1)
@@ -116,6 +122,5 @@ class Comm:
 		self.curs5.close()
 		self.cursListKeys.close()
 		self.connection.close()
-
 
 
