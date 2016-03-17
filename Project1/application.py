@@ -1,5 +1,5 @@
 from dateutil.parser import *
-from datetime import date,datetime
+from datetime import *
 import cx_Oracle
 import sys 
 import os
