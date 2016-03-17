@@ -72,7 +72,7 @@ class Comm:
 			ids = []
 
 			for row in rows:
-				ids.append(row[0])
+				ids.append(int(row[0]))
 
 			ids.sort()
 			return str(ids[len(ids)-1] +1)

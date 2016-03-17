@@ -275,7 +275,7 @@ class App:
 			return
 		driver_licence['sin'] = sin #Add sin to dictionary
 		licence_class = input("Please enter Licence Class:")
-		while ( len(licence_class)>10 or licence_no == ""): #Check if the licence class is valid or not
+		while ( len(licence_class)>10 or licence_class == ""): #Check if the licence class is valid or not
 			print ("The Licence Class that you entered is invalid. Please try again.")
 			licence_class = input("Please enter Licence Class:")
 		driver_licence['class'] = licence_class  #Add licence class to the dictionary
@@ -442,8 +442,8 @@ class App:
 		except cx_Oracle.DatabaseError as exc:
 			error=exc.args
 			#print( sys.stderr, "Oracle code:", error.code)
-			#print( sys.stderr, "Oracle message:", error.message)
-			print("Oops, something went wrong.")
+			print("Oracle message:", error.message)
+			#print("Oops, something went wrong.")
 
 	def searchEngine(self):
 		while(True):
