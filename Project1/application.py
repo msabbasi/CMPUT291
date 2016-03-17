@@ -303,7 +303,7 @@ class App:
 				driver_licence['photo'] = photo
 			
 			self.comm.insert(driver_licence, 'drive_licence')
-			print("You registered the new driver licence!")
+			print("Successfully registered the new driver licence #", driver_licence['licence_no'])
 		except IOError as io_err:
 			print("The photo that you are trying to upload does not exist.")
 		except cx_Oracle.DatabaseError as exc:
@@ -481,7 +481,7 @@ class App:
 
 
 			while(True):
-				term = input("Enter search term: ")
+				term = input("Enter search term or leave blank to go back: ")
 				if not term == "":
 					self.comm.search(choice, term)
 				else:
