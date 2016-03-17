@@ -75,7 +75,7 @@ class Comm:
 				ids.append(row[0])
 
 			ids.sort()
-			return str(ids[len(ids)-1] +1)
+			return str(int(ids[len(ids)-1]) +1)
 			
 		except cx_Oracle.DatabaseError as exc:
 			error, = exc.args
