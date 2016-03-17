@@ -46,7 +46,8 @@ class Comm:
 			statement+= key +', '
 			if key == 'photo':
 				self.curs.setinputsizes(image=cx_Oracle.BLOB)
-			if isinstance(table[key], str):
+				values+= "'" + table[key] +"', "
+			elif isinstance(table[key], str):
 				values+= "'" + table[key] +"', "
 			elif isinstance(table[key], datetime):
 				values+= "date '" + table[key].strftime("%y-%m-%d") +"', "
