@@ -93,6 +93,7 @@ class App:
 			except ValueError:
 				print("Invalid input. Please enter a number.")
 				people['height'] = None
+		people['weight'] = None
 		while (people['weight'] == None):
 			try:
 				people['weight'] = float(input("Weight (kg): "))
@@ -103,7 +104,7 @@ class App:
 		people['addr'] = input("Address: ")
 		
 		self.comm.insert(people, 'people')
-		self.comm.commit()
+		self.comm.connection.commit()
 		print("SIN#" + sin + " successfully registered.\n")
 
 	def CheckPrimaryOwner(self, seller_id, vehicle_id):
@@ -416,7 +417,7 @@ class App:
 		while( len(temp) > 15 or temp == "" ):
 			print("The SIN that you entered is invalid. Please try again.")
 			temp = input("SIN of the violator: ")
-		if not self.checkPersonReg(buyer_id):
+		if not self.checkPersonReg(temp):
 			print("This person is not registered.")
 			return
 		ticket['violator_no'] = temp
@@ -433,10 +434,10 @@ class App:
 			temp = input("Violation type: ")
 		ticket['vtype'] = temp
 
-		temp = input("Date of the violation (dd-mm-yyyy): ")
-		while (self.is_date_valid(saleDate) == False): 
+		temp = input("Date of the violation (mm-dd-yyyy): ")
+		while (self.is_date_valid(temp) == False): 
 			print ("The date entered is invalid. Please try again.")
-			temp = input("Date of the violation (dd-mm-yyyy): ")
+			temp = input("Date of the violation (mm-dd-yyyy): ")
 		ticket['vdate'] = parse(temp, dayfirst=True)
 
 		temp = input("Place of violation: ")
