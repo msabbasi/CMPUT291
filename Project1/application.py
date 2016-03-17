@@ -1,6 +1,8 @@
 from dateutil.parser import *
-from datetime import date,datetime
+from datetime import *
 import cx_Oracle
+import sys 
+import os
 
 class App:
 	
@@ -246,7 +248,7 @@ class App:
 			if (another != 'y'):
 				break
 
-			owner = self.addOwner(owner, 1)
+			owner = self.addOwner(owner, 0)
 			try:
 				self.comm.insert(owner, 'owner')
 				print("Owner added.")
@@ -303,9 +305,8 @@ class App:
 			print("You registered the new driver licence!")
 		except IOError as io_err:
 			print("The photo that you are trying to upload does not exist.")
-			
 		except cx_Oracle.DatabaseError as exc:
-			error=exc.args
+			[error] = exc.args
 			print( sys.stderr, "Oracle code:", error.code)
 			print( sys.stderr, "Oracle message:", error.message)
 		
@@ -448,8 +449,8 @@ class App:
 		except cx_Oracle.DatabaseError as exc:
 			error=exc.args
 			#print( sys.stderr, "Oracle code:", error.code)
-			print("Oracle message:", error.message)
-			#print("Oops, something went wrong.")
+			#print( sys.stderr, "Oracle message:", error.message)
+			print("Oops, something went wrong.")
 
 	def searchEngine(self):
 		while(True):

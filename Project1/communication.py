@@ -28,7 +28,7 @@ class Comm:
 				self.curs4 = self.connection.cursor()
 				self.curs4.prepare("SELECT t.*, tt.fine FROM people p, ticket t, ticket_type tt WHERE p.sin = :variable AND p.sin = t.violator_no AND t.vtype = tt.vtype")
 				self.curs5 = self.connection.cursor()
-				self.curs5.prepare("SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description, dl.expiring_date FROM people p, drive_licence dl, driving_condition dc, restriction r WHERE p.name = :variable AND p.sin = dl.sin AND dl.licence_no = r.licence_no AND r.r_id = dc.c_id")
+				self.curs5.prepare("SELECT count(DISTINCT transaction_id), avg(price), count(DISTINCT t.ticket_no) FROM vehicle h, auto_sale a, ticket t WHERE t.vehicle_id (+) = h.serial_no AND a.vehicle_id (+) = h.serial_no GROUP BY h.serial_no HAVING h.serial_no = :variable ")
 				
 			except cx_Oracle.DatabaseError as exc:
 				successful = False
@@ -40,13 +40,15 @@ class Comm:
 					print("Sorry, there was a problem. Please try again.")
 
 	def insert(self, table, name):
+		photo = None
 		statement = 'insert into ' + name + '('
 		values = ' values('
 		for key in table:
 			statement+= key +', '
 			if key == 'photo':
-				self.curs.setinputsizes(image=cx_Oracle.BLOB)
-				values+= "'" + table[key] +"', "
+				self.curs.setinputsizes(photo=cx_Oracle.BLOB)
+				photo = table[key]
+				values+= ":photo, "
 			elif isinstance(table[key], str):
 				values+= "'" + table[key] +"', "
 			elif isinstance(table[key], datetime):
@@ -57,8 +59,11 @@ class Comm:
 		values = values[:-2]
 		statement += ') ' + values + ')'
 
-		#print(statement)
-		self.curs.execute(statement)
+		print(statement)
+		if photo == None:
+			self.curs.execute(statement)
+		else:
+			self.curs.execute(statement, {'photo':photo})
 		self.connection.commit()
 
 	def getNewID(self, tableName, column):
@@ -73,7 +78,7 @@ class Comm:
 			ids = []
 
 			for row in rows:
-				ids.append(int(row[0]))
+				ids.append(row[0])
 
 			ids.sort()
 			return str(int(ids[len(ids)-1]) +1)
@@ -117,6 +122,5 @@ class Comm:
 		self.curs5.close()
 		self.cursListKeys.close()
 		self.connection.close()
-
 
 
