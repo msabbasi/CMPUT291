@@ -30,7 +30,7 @@ while(True):
 
 	# Exit if exit option choosen
 	if (choice == 6):
-		print("Exitting...")
+		print("Exiting...")
 		break
 
 	# Start the app supplying the choice and the communicator

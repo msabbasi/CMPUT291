@@ -7,6 +7,7 @@ import os
 class App:
 	
 	choices = {1: 'Vehicle Registration', 2: 'Auto Transaction Registration', 3: 'Driver Licence Registration', 4: 'Violation Record Entry', 5: 'Search Engine'}
+	searchChoices = {1: "Driver Information by Name", 2: "Driver Information by Licence Number", 3: "Violation Records by Licence Number", 4: "Violation Records by SIN", 5: "Vehicle History by Serial Number"}
 
 	def __init__(self, mode, communicator):
 		self.appMode = mode
@@ -24,7 +25,7 @@ class App:
 			print("Enter 'c' to continue to ", self.choices[self.appMode])
 			inpt = input("-->")
 			if inpt == 'q':
-				print("Exitting...")
+				print("Exiting...")
 				return 0
 			elif inpt == 'm':
 				return 1
@@ -457,7 +458,7 @@ class App:
 			print("Select an option:")
 			print("1. Search driver information by name")
 			print("2. Search driver information by licence number")
-			print("3. Search violation records by name")
+			print("3. Search violation records by licence number")
 			print("4. Search violation records by SIN")
 			print("5. Search vehicle history by serial number")
 			print("6. Return to main menu")
@@ -472,31 +473,18 @@ class App:
 				except ValueError:
 					choice = 0
 
-			if choice == 1:
-				print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-				print("                 <<< Driver Information >>>\n")
-				term = input("Enter name or leave blank to change choice: ")
-			elif choice == 2:
-				print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-				print("                 <<< Driver Information >>>\n")
-				term = input("Enter licence number or leave blank to change choice: ")
-			elif choice == 3:
-				print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-				print("                 <<< Violation Records >>>\n")
-				term = input("Enter name or leave blank to change choice: ")
-			elif choice == 4:
-				print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-				print("                 <<< Violation Records >>>\n")
-				term = input("Enter SIN or leave blank to change choice: ")
-			elif choice == 5:
-				print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-				print("                  <<< Vehicle History >>>\n")
-				term = input("Enter serial number or leave blank to change choice: ")
-			else:
+			if choice == 6:
 				break
 
+			print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+			print("                 <<< ", self.searchChoices[choice], " >>>\n")
 
-			if not term == "":
-				self.comm.search(choice, term)
 
-			print()
+			while(True):
+				term = input("Enter search term: ")
+				if not term == "":
+					self.comm.search(choice, term)
+				else:
+					break
+				print()
+			print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
