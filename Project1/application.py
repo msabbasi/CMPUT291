@@ -354,10 +354,13 @@ class App:
 		vehicle['color'] = color
 		# get vehicle type_id
 		# should we have function to look and find the type_id?
-		type_id = int(input("Please enter the type_id: "))
-		while( type(type_id) != int): # type_id not an integer
-			print("The type_id is invalid. Please try again.")
-			type_id = int(input("Please enter the type_id: "))
+		while(True):
+			try:
+				type_id = int(input("Please enter the type_id: "))
+				break
+			except ValueError:
+				print("The type_id is invalid. Please try again.")
+				type_id = int(input("Please enter the type_id: "))
 		vehicle['type_id'] = type_id
 		
 		# add the vehicle to database
