@@ -76,36 +76,51 @@ class App:
 
 		people = {}
 		people['sin'] = sin
-		people['name'] = input("Name: ")
-		gender = input("Gender(f/m): ")
+		temp = input("Name: ").strip()
+		while( temp == ""):
+			print("Invalid input. Please try again.")
+			temp = input("Name: ").strip()
+		people['name'] = temp
+		gender = input("Gender(f/m): ").strip()
 		while(True):
 			if (gender == 'f' or gender == 'm'):
 				people['gender'] = gender
 				break
 			else:
-				gender = input("Invalid entry. Please try again.\nGender(f/m): ")
-		birthday = input("Birthday (mm-dd-yyyy): ")
+				gender = input("Invalid entry. Please try again.\nGender(f/m): ").strip()
+		birthday = input("Birthday (mm-dd-yyyy): ").strip()
 		while (self.is_date_valid(birthday) == False): 
 			print ("The date entered is invalid. Please try again.")
 			birthday = input("Birthday (mm-dd-yyyy): ")
 		people['birthday'] = parse(birthday, dayfirst=False)
 		people['height'] = None
-		while (people['height'] == None):
+		while (people['height'] == None or people['height'] == ""):
 			try:
-				people['height'] = float(input("Height (cm): "))
+				people['height'] = float(input("Height (cm): ").strip())
 			except ValueError:
 				print("Invalid input. Please enter a number.")
 				people['height'] = None
 		people['weight'] = None
-		while (people['weight'] == None):
+		while (people['weight'] == None or people['weight'] == ""):
 			try:
 				people['weight'] = float(input("Weight (kg): "))
 			except ValueError:
 				print("Invalid input. Please enter a number.")
-		people['eyecolor'] = input("Eye colour: ")
-		people['haircolor'] = input("Hair colour: ")
-		people['addr'] = input("Address: ")
-		
+		temp = input("Eye colour: ").strip()
+		while( temp == ""):
+			print("Invalid input. Please try again.")
+			temp = input("Eye colour: ").strip()
+		people['eyecolor'] = temp
+		temp = input("Hair colour: ").strip()
+		while( temp == ""):
+			print("Invalid input. Please try again.")
+			temp = input("Hair colour: ").strip()
+		people['haircolor'] = temp
+		temp = input("Address: ").strip()
+		while( temp == ""):
+			print("Invalid input. Please try again.")
+			temp = input("Address: ").strip()
+		people['addr'] = temp		
 		self.comm.insert(people, 'people')
 		self.comm.connection.commit()
 		print("SIN#" + sin + " successfully registered.\n")
