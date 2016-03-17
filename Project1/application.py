@@ -272,14 +272,9 @@ class App:
 		
 	def driverLicenceReg(self):
 		driver_licence = {}
-		licence_no = input("Please enter Licence Number:")
-		while( len(licence_no)>15 or licence_no == ""): #If licence no has more than 15 character and does not entered anything
-			print("The licence number that you entered is invalid. Please try again.")
-			licence_no = input("Please enter Licence Number:")
-		if not self.CheckDriverLicence(licence_no): #Check if the licence number is in the system
-			print("The licence number that you entered is already in the system.")
-			driverLicenceReg()
-		driver_licence['licence_no'] = licence_no #Add the licence number in the dictionary
+
+		driver_licence['licence_no'] = self.comm.getNewID('drive_licence', 'licence_no') #Add the licence number in the dictionary
+
 		sin = input("Please enter Social Insurance Number:") #Ask sin
 		while( len(sin) > 15 or sin == "" ): #Check the sin is valid or not
 			print("The Social Insurance Number that you entered is invalid. Please try again.")
