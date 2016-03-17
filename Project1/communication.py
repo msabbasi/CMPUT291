@@ -24,9 +24,9 @@ class Comm:
 				self.curs2 = self.connection.cursor()
 				self.curs2.prepare("SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description , dl.expiring_date FROM people p, drive_licence dl, restriction r, driving_condition dc WHERE p.sin = dl.sin AND r.licence_no (+)= dl.licence_no AND dc.c_id (+)= r.r_id AND dl.licence_no = :variable ")
 				self.curs3 = self.connection.cursor()
-				self.curs3.prepare("SELECT t.*, tt.fine FROM people p, ticket t, ticket_type tt WHERE p.name = :variable AND p.sin = t.violator_no AND t.vtype = tt.vtype")
+				self.curs3.prepare("SELECT t.*, tt.fine FROM drive_licence dl, ticket t, ticket_type tt WHERE dl.licence_no = :variable AND t.violator_no (+)= dl.sin AND t.vtype = tt.vtype")
 				self.curs4 = self.connection.cursor()
-				self.curs4.prepare("SELECT t.*, tt.fine FROM people p, ticket t, ticket_type tt WHERE p.sin = :variable AND p.sin = t.violator_no AND t.vtype = tt.vtype")
+				self.curs4.prepare("SELECT t.*, tt.fine FROM people p, ticket t, ticket_type tt WHERE p.sin = :variable AND t.violator_no (+)= p.sin  AND t.vtype = tt.vtype")
 				self.curs5 = self.connection.cursor()
 				self.curs5.prepare("SELECT count(DISTINCT transaction_id), avg(price), count(DISTINCT t.ticket_no) FROM vehicle h, auto_sale a, ticket t WHERE t.vehicle_id (+) = h.serial_no AND a.vehicle_id (+) = h.serial_no GROUP BY h.serial_no HAVING h.serial_no = :variable ")
 				
@@ -94,16 +94,16 @@ class Comm:
 			self.curs1.execute(None, {'variable':term})
 			rows = self.curs1.fetchall();		    			
 		elif mode == 2:
-			self.curs2.execute(None, {'variable':term})
+			self.curs2.execute(None, {'variable':int(term)})
 			rows = self.curs2.fetchall();
 		elif mode == 3:
-			self.curs3.execute(None, {'variable':term})
+			self.curs3.execute(None, {'variable':int(term)})
 			rows = self.curs3.fetchall();
 		elif mode == 4:
-			self.curs4.execute(None, {'variable':term})
+			self.curs4.execute(None, {'variable':int(term)})
 			rows = self.curs4.fetchall();
 		else:
-			self.curs5.execute(None, {'variable':term})
+			self.curs5.execute(None, {'variable':int(term)})
 			rows = self.curs5.fetchall();
 
 		if len(rows) == 0:
