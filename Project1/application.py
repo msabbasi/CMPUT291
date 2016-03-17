@@ -118,17 +118,6 @@ class App:
 		else:
 			return True
 	
-	def CheckDriverLicence(self, licence_no):
-		curs = self.comm.connection.cursor()
-		check = "SELECT * FROM drive_licence dl WHERE dl.licence_no = '" + licence_no + "'"
-		print(check)
-		curs.execute(check)
-		row = curs.fetchall()
-		curs.close()
-		if (len(row) == 0):
-			return True
-		else:
-			return False 
 
 	def CheckIfPersonHasLicence(self, sin):
 		curs = self.comm.connection.cursor()
@@ -273,8 +262,8 @@ class App:
 	def driverLicenceReg(self):
 		driver_licence = {}
 
-		driver_licence['licence_no'] = self.comm.getNewID('drive_licence', 'licence_no') #Add the licence number in the dictionary
-
+		driver_licence['licence_no'] = self.comm.getNewID('drive_licence', 'licence_no')
+		
 		sin = input("Please enter Social Insurance Number:") #Ask sin
 		while( len(sin) > 15 or sin == "" ): #Check the sin is valid or not
 			print("The Social Insurance Number that you entered is invalid. Please try again.")
