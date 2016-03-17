@@ -1,5 +1,6 @@
 from dateutil.parser import *
 from datetime import date,datetime
+import cx_Oracle
 
 class App:
 	
@@ -10,11 +11,15 @@ class App:
 		self.comm = communicator
 
 	def run(self):
-		print("Enter 'm' to go back to main menu.")
-		print("Enter 'q' to quit from the system.")
-		print("Enter 'c' to continue to ", self.choices[self.appMode])
+		print()
+		print("====================================================================")
+		print("                      ", self.choices[self.appMode])
+		print("====================================================================")
 		
 		while(True):
+			print("\nEnter 'm' to go back to main menu.")
+			print("Enter 'q' to quit from the system.")
+			print("Enter 'c' to continue to ", self.choices[self.appMode])
 			inpt = input("-->")
 			if inpt == 'q':
 				print("Exitting...")
@@ -22,7 +27,8 @@ class App:
 			elif inpt == 'm':
 				return 1
 			elif inpt == 'c':
-				
+				print()
+
 				if self.appMode == 1:
 					self.vehicleReg()
 				elif self.appMode == 2:
@@ -63,7 +69,7 @@ class App:
 
 	def regPerson(self, sin):
 
-		print("This person is not registered. Please provide the following information.")
+		print("\nPerson with the SIN entered not in system. Please register person:")
 
 		people = {}
 		people['sin'] = sin
@@ -75,20 +81,34 @@ class App:
 				break
 			else:
 				gender = input("Invalid entry. Please try again.\nGender(f/m): ")
-		birthday = input("Birthday (dd-mm-yyyy): ")
-		people['birthday'] = parse(birthday, dayfirst=True)
-		people['height'] = float(input("Height (cm): "))
-		people['weight'] = float(input("Weight (kg): "))
+		birthday = input("Birthday (mm-dd-yyyy): ")
+		while (self.is_date_valid(birthday) == False): 
+			print ("The date entered is invalid. Please try again.")
+			birthday = input("Birthday (mm-dd-yyyy): ")
+		people['birthday'] = parse(birthday, dayfirst=False)
+		people['height'] = None
+		while (people['height'] == None):
+			try:
+				people['height'] = float(input("Height (cm): "))
+			except ValueError:
+				print("Invalid input. Please enter a number.")
+				people['height'] = None
+		while (people['weight'] == None):
+			try:
+				people['weight'] = float(input("Weight (kg): "))
+			except ValueError:
+				print("Invalid input. Please enter a number.")
 		people['eyecolor'] = input("Eye colour: ")
 		people['haircolor'] = input("Hair colour: ")
 		people['addr'] = input("Address: ")
 		
 		self.comm.insert(people, 'people')
-		print("SIN#" + sin + " successfully registered.")
+		self.comm.commit()
+		print("SIN#" + sin + " successfully registered.\n")
 
-	def CheckSeller(self, seller_id, vehicle_id):
+	def CheckPrimaryOwner(self, seller_id, vehicle_id):
 		curs = self.comm.connection.cursor()
-		check = "SELECT * FROM owner o WHERE vehicle_id = '" + vehicle_id+" owner_id = '" + seller_id+" is_primary_owner = y'"
+		check = "SELECT * FROM owner o WHERE vehicle_id = '" + vehicle_id+"' AND owner_id = '" + seller_id+"' AND is_primary_owner = 'y'"
 		curs.execute(check)
 		row = curs.fetchall()
 		curs.close()
@@ -111,7 +131,7 @@ class App:
 
 	def CheckIfPersonHasLicence(self, sin):
 		curs = self.comm.connection.cursor()
-		check = "SELECT * FROM driver_licence dl WHERE dl.sin = '" + sin "'"
+		check = "SELECT * FROM drive_licence dl WHERE dl.sin = '" + sin + "'"
 		curs.execute(check)
 		row = curs.fetchall()
 		curs.close()
@@ -119,17 +139,6 @@ class App:
 			return True
 		else:
 			return False 
- 
-	def checkPersonReg(self, sin):
-		curs = self.comm.connection.cursor()
-		check = "SELECT * FROM people p WHERE p.sin = '" + sin + "'"
-		curs.execute(check)
-		row = curs.fetchall()
-		curs.close()
-		if (len(row) == 0):
-			return False
-		else:
-			return True
 	
 	# check if vehicle is in system 
 	def checkVehicleReg(self, serial_no):
@@ -146,10 +155,10 @@ class App:
 	# function to deal with primary/secondary owners 
 	def addOwner(self, owner, mode):
 		# get owner_id
-		owner_id = input("Please enter the person's sin number:")
+		owner_id = input("Please enter the owner's sin number: ")
 		while( len(owner_id) > 15 or owner_id == ""): # if sin is invalid
 			print("The sin is invalid. Please try again.")
-			owner_id = input("Please enter the persons sin number:")
+			owner_id = input("Please enter the owner's sin number: ")
 		# need to check if person is in database 
 		if (self.checkPersonReg(owner_id) == True):
 			# if returns true we are ok 
@@ -161,10 +170,10 @@ class App:
 		owner['owner_id'] = owner_id
 		if (mode == 0):
 			# is primary owner?
-			prim_own = input("Are they a primary owner('y' or 'n'):")
+			prim_own = input("Are they a primary owner('y' or 'n'): ")
 			while( prim_own != 'y' and prim_own != 'n'):
 				print("Invalid input. Please try again.")
-				prim_own = input("Are they a primary owner('y' or 'n'):")
+				prim_own = input("Are they a primary owner('y' or 'n'): ")
 			# add response to our dict	
 			owner['is_primary_owner'] = prim_own	
 	
@@ -174,16 +183,13 @@ class App:
 		curs = self.comm.connection.cursor()
 		check = "DELETE FROM owner o WHERE o.vehicle_id = '" + serial_no + "'"
 		curs.execute(check)
-		row = curs.fetchall()
+		self.comm.connection.commit()
 		curs.close()
-		if (len(row) == 0):
-			return False
-		else:
-			return True
-
 
 	def autoTransaction(self):
 		auto_sale = {}
+
+		print("Please provide the following information.\n")
 
 		vehicle_id = input("Vehicle serial #: ")
 		while( len(vehicle_id) > 15 or vehicle_id == "" ):
@@ -199,53 +205,66 @@ class App:
 			print("The SIN that you entered is invalid. Please try again.")
 			seller_id = input("SIN of the seller: ")
 		if not self.checkPersonReg(seller_id):
-			print("Person with the SIN entered not in system. Please register person:")
 			self.regPerson(seller_id)
 		auto_sale['seller_id'] = seller_id
 
-		# Need to check primary owner.
-		if not self.CheckSeller(seller_id, vehicle_id): 
-			print("The person who tries to sell the vehicle is not primary owner")
-			print("Please, try auto transaction with the primary owner of the vehicle")
-			autoTransaction()
+		if not self.CheckPrimaryOwner(seller_id, vehicle_id): 
+			print("\nThe seller is not the primary owner.")
+			print("Please try auto transaction with the primary owner of the vehicle.")
+			return
 
 		buyer_id = input("SIN of the buyer: ")
 		while( len(buyer_id) > 15 or buyer_id == "" ):
 			print("The SIN that you entered is invalid. Please try again.")
 			buyer_id = input("SIN of the buyer: ")
 		if not self.checkPersonReg(buyer_id):
-			print("Person with the SIN entered not in system. Please register person:")
 			self.regPerson(buyer_id)
 		auto_sale['buyer_id'] = buyer_id
 
+		
+		saleDate = input("Date of the transaction (mm-dd-yyyy): ")
+		while (self.is_date_valid(saleDate) == False): 
+			print ("The date entered is invalid. Please try again.")
+			saleDate = input("Date of the transaction (mm-dd-yyyy): ")
+		auto_sale['s_date'] = parse(saleDate, dayfirst=False) 
 
-		saleDate = input("Date of the transaction (dd-mm-yyyy): ")
-		auto_sale['s_date'] = parse(saleDate, dayfirst=True) 
-
-		auto_sale['price'] = input("Price of the vehicle sold: ")
+		auto_sale['price'] = None
+		while (auto_sale['price'] == None):
+			try:
+				auto_sale['price'] = float(input("Price of the vehicle sold: "))
+			except ValueError:
+				print("Input not valid. Please enter a numeric number.")
+				auto_sale['price'] = None
 
 		auto_sale['transaction_id'] = self.comm.getNewID('auto_sale', 'transaction_id')
 
 		self.comm.insert(auto_sale, 'auto_sale')
 
-		removePrevOwners(vehicle_id)
+		self.removePrevOwners(vehicle_id)
 
 
 		owner = {}
-		owner['vehicle_id'] = serial_no
+		owner['vehicle_id'] = vehicle_id
 		owner['owner_id'] = buyer_id
 		owner['is_primary_owner'] = 'y'
 				
 		self.comm.insert(owner, 'owner')
 
 		while(True):
-			another = input('Would you like to add another owner? (y or n)')
-			if (another == 'n'):
+			another = input('Press y to add another owner or press any other key to return to the main menu. ')
+			
+			if (another != 'y'):
 				break
-			# deal with primary and secondary owners 
-			owner = self.addOwner(owner, 1)
-			self.comm.insert(owner, 'owner')
 
+			owner = self.addOwner(owner, 1)
+			try:
+				self.comm.insert(owner, 'owner')
+				print("Owner added.")
+			except cx_Oracle.DatabaseError as exc:
+				error, = exc.args
+				#print( sys.stderr, "Oracle code:", error.code)
+				#print( sys.stderr, "Oracle message:", error.message)
+				print("This person is already an owner of this vehicle.")
 
 		print("Auto transaction #" + auto_sale['transaction_id'] + " successfully registered.")
 
@@ -308,10 +327,10 @@ class App:
 		vehicle = {}
 		
 		# get vehicle serial_no
-		serial_no = input("Please enter the serial number of the vehicle:")
+		serial_no = input("Please enter the serial number of the vehicle: ")
 		while( len(serial_no) > 15 or serial_no == ""): #if serial_no is invalid
 			print("The serial number that you have entered is invalid. Please try again.")
-			serial_no = input("Please enter the serial number of the vehicle:")
+			serial_no = input("Please enter the serial number of the vehicle: ")
 		vehicle['serial_no'] = serial_no
 		# need to check if vehicle is in database 
 		if (self.checkVehicleReg(serial_no) == False):
@@ -322,39 +341,40 @@ class App:
 			print("serial number already in the system!")
 			return 
 		# get vehicle make 
-		maker = input("Please enter the make of the vehicle:")
+		maker = input("Please enter the make of the vehicle: ")
 		while( len(maker) > 20 or maker == ""): #if maker is invalid
 			print("The make that you have entered is invalid. Please try again.")
-			maker = input("Please enter the make of the vehicle:")
+			maker = input("Please enter the make of the vehicle: ")
 		vehicle['maker'] = maker
 		# get vehicle model
-		model = input("Please enter the model of the vehicle:")
+		model = input("Please enter the model of the vehicle: ")
 		while( len(model) > 20 or model == ""): #if model is invalid
 			print("The model that you have entered is invalid. Please try again.")
-			model = input("Please enter the model of the vehicle:")
+			model = input("Please enter the model of the vehicle: ")
 		vehicle['model'] = model
 		# get vehicle year
-		year = int(input("Please enter the year of the vehicle:"))
+		year = int(input("Please enter the year of the vehicle: "))
 		while( year > 9999 or year < 1): #if year is not between 1-4 digits 
 			print("The year that you have entered is invalid. Please try again.")
-			year = int(input("Please enter the year of the vehicle:"))
+			year = int(input("Please enter the year of the vehicle: "))
 		vehicle['year'] = year
 		# get vehicle color 
-		color = input("Please enter the color of the vehicle:")
+		color = input("Please enter the color of the vehicle: ")
 		while( len(color) > 10 or color == ""): # if color is invalid
 			print("The color that you have entered is invalid. Please try again.")
-			color = input("Please enter the color of the vehicle:")
+			color = input("Please enter the color of the vehicle: ")
 		vehicle['color'] = color
 		# get vehicle type_id
 		# should we have function to look and find the type_id?
-		type_id = int(input("Please enter the type_id:"))
+		type_id = int(input("Please enter the type_id: "))
 		while( type(type_id) != int): # type_id not an integer
 			print("The type_id is invalid. Please try again.")
-			type_id = int(input("Please enter the type_id:"))
+			type_id = int(input("Please enter the type_id: "))
 		vehicle['type_id'] = type_id
 		
 		# add the vehicle to database
-		self.comm.insert(vehicle, 'vehicle')		
+		self.comm.insert(vehicle, 'vehicle')
+		print("Vehicle with serial # ", serial_no, " successfully registered.")		
 		
 		owner = {}
 		owner['vehicle_id'] = serial_no
@@ -363,33 +383,43 @@ class App:
 			# deal with primary and secondary owners 
 			owner = self.addOwner(owner, 0)
 			self.comm.insert(owner, 'owner')
+			try:
+				self.comm.insert(owner, 'owner')
+				print("Owner added.")
+			except cx_Oracle.DatabaseError as exc:
+				error, = exc.args
+				#print( sys.stderr, "Oracle code:", error.code)
+				#print( sys.stderr, "Oracle message:", error.message)
+				print("This person is already an owner of this vehicle.")
 			another = input('Would you like to add another owner? (y or n)')
 			if (another == 'n'):
 				break
 			
 	def violationRec(self):
 		
-		#TODO: Better error handling
 		#TODO: Optional fields?
-		#TODO: Check foreign fields?
 
 		ticket = {}
 
 		ticket['ticket_no'] = self.comm.getNewID('ticket', 'ticket_no')
 
-		temp = input("SIN of the violator: ")
-		while( len(temp) > 15 or temp == "" ):
-			print("The SIN that you entered is invalid. Please try again.")
-			temp = input("SIN of the violator: ")
-		ticket['violator_no'] = temp
-
-		#TODO: Check if person exists
-
 		temp = input("Serial # of the vehicle involved: ")
 		while( len(temp) > 15 or temp == "" ):
 			print("The serial # that you entered is invalid. Please try again.")
 			temp = input("Serial # of the vehicle involved: ")
+		if not self.checkVehicleReg(temp):
+			print("This vehicle is not registered. Please register the vehicle first.")
+			return
 		ticket['vehicle_id'] = temp
+
+		temp = input("SIN of the violator: ")
+		while( len(temp) > 15 or temp == "" ):
+			print("The SIN that you entered is invalid. Please try again.")
+			temp = input("SIN of the violator: ")
+		if not self.checkPersonReg(buyer_id):
+			print("This person is not registered.")
+			return
+		ticket['violator_no'] = temp
 
 		temp = input("SIN of the officer: ")
 		while( len(temp) > 15 or temp == "" ):
@@ -404,6 +434,9 @@ class App:
 		ticket['vtype'] = temp
 
 		temp = input("Date of the violation (dd-mm-yyyy): ")
+		while (self.is_date_valid(saleDate) == False): 
+			print ("The date entered is invalid. Please try again.")
+			temp = input("Date of the violation (dd-mm-yyyy): ")
 		ticket['vdate'] = parse(temp, dayfirst=True)
 
 		temp = input("Place of violation: ")
@@ -418,7 +451,14 @@ class App:
 			temp = input("Description: ")	
 		ticket['descriptions'] = temp
 
-		self.comm.insert(ticket, 'ticket')
+		try:
+			self.comm.insert(ticket, 'ticket')
+			print("Successfully entered ticket #", ticket['ticket_no'])
+		except cx_Oracle.DatabaseError as exc:
+			error=exc.args
+			#print( sys.stderr, "Oracle code:", error.code)
+			#print( sys.stderr, "Oracle message:", error.message)
+			print("Oops, something went wrong.")
 
 	def searchEngine(self):
 		while(True):
@@ -429,27 +469,42 @@ class App:
 			print("4. Search violation records by SIN")
 			print("5. Search vehicle history by serial number")
 			print("6. Return to main menu")
-			choice = int(input("-->"))
+			try:
+				choice = int(input("Choose a number: "))
+			except ValueError:
+				choice = 0
 
 			while (choice > 6 or choice < 1):
-				choice = int(input("Choice not valid. Please choose a number between 1-5: "))
+				try:
+					choice = int(input("Choice not valid. Please choose a number between 1-6: "))
+				except ValueError:
+					choice = 0
 
 			if choice == 1:
-				print("Driver Information")
+				print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+				print("                 <<< Driver Information >>>\n")
 				term = input("Enter name or leave blank to change choice: ")
 			elif choice == 2:
-				print("Driver Information")
+				print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+				print("                 <<< Driver Information >>>\n")
 				term = input("Enter licence number or leave blank to change choice: ")
 			elif choice == 3:
-				print("Violation Records")
+				print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+				print("                 <<< Violation Records >>>\n")
 				term = input("Enter name or leave blank to change choice: ")
 			elif choice == 4:
-				print("Violation Records")
+				print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+				print("                 <<< Violation Records >>>\n")
 				term = input("Enter SIN or leave blank to change choice: ")
 			elif choice == 5:
-				print("Vehicle History")
+				print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+				print("                  <<< Vehicle History >>>\n")
 				term = input("Enter serial number or leave blank to change choice: ")
 			else:
 				break
 
-			self.comm.search(choice, term)
+
+			if not term == "":
+				self.comm.search(choice, term)
+
+			print()
