@@ -19,6 +19,14 @@ insert into people values
 '356 123 Ave, Edmonton', 'f', date '93-08-10');
 
 insert into people values
+('5', 'Bob', 136, 162, 'brown', 'black',
+'356 123 Ave, Edmonton', 'm', date '93-08-10');
+
+insert into people values
+('6', 'Bob', 162, 136, 'red', 'blue',
+'444 123 Ave, Edmonton', 'm', date '86-08-10');
+
+insert into people values
 ('088', 'Officer', 162, 136, 'brown', 'black',
 '356 123 Ave, Edmonton', 'm', date '90-08-10');
 
@@ -45,6 +53,12 @@ insert into drive_licence values
 
 insert into drive_licence values
 (0004, 4, 'nondriving', null, date '14-03-01', date '19-03-01');
+
+insert into drive_licence values
+(0005, 5, '5', null, date '14-03-01', date '19-03-01');
+
+insert into drive_licence values
+(0006, 6, '5', null, date '14-03-01', date '19-03-01');
 
 
 insert into restriction values
