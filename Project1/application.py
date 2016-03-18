@@ -420,6 +420,7 @@ class App:
 		# add the primary owner
 		self.addOwner(owner, 0)
 		self.comm.insert(owner, 'owner')
+		print("Primary owner successfully added.")
 		# loop to keep adding secondary owners 
 		while(True):
 			yes = input('Would you like to add a secondary owner? (y or n):')
@@ -429,7 +430,7 @@ class App:
 				self.comm.insert(owner, 'owner')
 				try:
 					self.comm.insert(owner, 'owner')
-					print("Owner added.")
+					print("Secondary owner successfully added.")
 				except cx_Oracle.DatabaseError as exc:
 					error, = exc.args
 					#print( sys.stderr, "Oracle code:", error.code)
