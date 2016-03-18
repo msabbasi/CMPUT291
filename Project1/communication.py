@@ -24,9 +24,9 @@ class Comm:
 				self.curs = self.connection.cursor()
 				self.cursListKeys = self.connection.cursor()
 				self.curs1 = self.connection.cursor()
-				self.curs1.prepare('SELECT p.name, p.birthday, dl.licence_no, dl.expiring_date, dc.description , p.addr FROM people p, drive_licence dl, restriction r, driving_condition dc WHERE p.sin = dl.sin AND r.licence_no (+)= dl.licence_no AND dc.c_id (+)= r.r_id AND upper(p.name) = :variable')
+				self.curs1.prepare('SELECT p.name, p.birthday, dl.licence_no, dl.class, dl.expiring_date, dc.description , p.addr FROM people p, drive_licence dl, restriction r, driving_condition dc WHERE p.sin = dl.sin AND r.licence_no (+)= dl.licence_no AND dc.c_id (+)= r.r_id AND upper(p.name) = :variable')
 				self.curs2 = self.connection.cursor()
-				self.curs2.prepare("SELECT p.name, p.birthday, dl.licence_no, dl.expiring_date, dc.description , p.addr FROM people p, drive_licence dl, restriction r, driving_condition dc WHERE p.sin = dl.sin AND r.licence_no (+)= dl.licence_no AND dc.c_id (+)= r.r_id AND dl.licence_no = :variable ")
+				self.curs2.prepare("SELECT p.name, p.birthday, dl.licence_no, dl.class, dl.expiring_date, dc.description , p.addr FROM people p, drive_licence dl, restriction r, driving_condition dc WHERE p.sin = dl.sin AND r.licence_no (+)= dl.licence_no AND dc.c_id (+)= r.r_id AND dl.licence_no = :variable ")
 				self.curs3 = self.connection.cursor()
 				self.curs3.prepare("SELECT t.*, tt.fine FROM drive_licence dl, ticket t, ticket_type tt WHERE dl.licence_no = :variable AND t.violator_no (+)= dl.sin AND t.vtype = tt.vtype")
 				self.curs4 = self.connection.cursor()
@@ -109,30 +109,30 @@ class Comm:
 			self.curs1.execute(None, {'variable':term.upper()})
 			rows = self.curs1.fetchall()
 			# display column names
-			print("______________________________________________________________________________________________________________________")
-			print("     Name      | Birthday |   Licence #   |Expiry Date|        Condition         |   Address   ")
-			print("``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````")
+			print("________________________________________________________________________________________________________________________")
+			print("     Name      | Birthday |   Licence #   |    Class    |Expiry Date|        Condition         |   Address   ")
+			print("````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````")
 			licNo = None
 			# display all the fields with the right amount of spaces in between
 			for row in rows:
 				if row[1] == licNo:
-					print("               |          |               |           |"+str(row[4])+" "*(26-len(str(row[4])))+"|")
+					print("               |          |               |           |           |"+str(row[4])+" "*(26-len(str(row[4])))+"|")
 				else:				
-					print(row[0]+" "*(15-len(row[0]))+"|"+row[1].strftime('%m/%d/%Y')+"  "+"|"+row[2]+" "*(15-len(row[2]))+"|"+row[3].strftime('%m/%d/%Y')+"   "+"|"+str(row[4])+" "*(26-len(str(row[4])))+"|"+row[5])
+					print(row[0]+" "*(15-len(row[0]))+"|"+row[1].strftime('%m/%d/%Y')+"  "+"|"+row[2]+" "*(15-len(row[2]))+"|"+row[3]+" "*(13-len(row[3]))+"|"+row[4].strftime('%m/%d/%Y')+"   "+"|"+str(row[5])+" "*(26-len(str(row[5])))+"|"+row[6])
 				licNo = row[1]
 	
 		elif mode == 2:
 			self.curs2.execute(None, {'variable':int(term)})
 			rows = self.curs2.fetchall()
 			print("______________________________________________________________________________________________________________________")
-			print("     Name      | Birthday |   Licence #   |Expiry Date|        Condition         |   Address   ")
+			print("     Name      | Birthday |   Licence #   |    Class    |Expiry Date|        Condition         |   Address   ")
 			print("``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````")
 			licNo = None
 			for row in rows:
 				if row[1] == licNo:
-					print("               |          |               |           |"+str(row[4])+" "*(26-len(str(row[4])))+"|")
+					print("               |          |               |           |           |"+str(row[4])+" "*(26-len(str(row[4])))+"|")
 				else:				
-					print(row[0]+" "*(15-len(row[0]))+"|"+row[1].strftime('%m/%d/%Y')+"  "+"|"+row[2]+" "*(15-len(row[2]))+"|"+row[3].strftime('%m/%d/%Y')+"   "+"|"+str(row[4])+" "*(26-len(str(row[4])))+"|"+row[5])
+					print(row[0]+" "*(15-len(row[0]))+"|"+row[1].strftime('%m/%d/%Y')+"  "+"|"+row[2]+" "*(15-len(row[2]))+"|"+row[3]+" "*(13-len(row[3]))+"|"+row[4].strftime('%m/%d/%Y')+"   "+"|"+str(row[5])+" "*(26-len(str(row[5])))+"|"+row[6])
 				licNo = row[1]
 
 		elif mode == 3:
