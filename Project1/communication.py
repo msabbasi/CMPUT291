@@ -20,7 +20,7 @@ class Comm:
 				self.curs = self.connection.cursor()
 				self.cursListKeys = self.connection.cursor()
 				self.curs1 = self.connection.cursor()
-				self.curs1.prepare('SELECT p.name, p.birthday, dl.licence_no, dl.expiring_date, dc.description , p.addr FROM people p, drive_licence dl, restriction r, driving_condition dc WHERE p.sin = dl.sin AND r.licence_no (+)= dl.licence_no AND dc.c_id (+)= r.r_id AND p.name =:variable')
+				self.curs1.prepare('SELECT p.name, p.birthday, dl.licence_no, dl.expiring_date, dc.description , p.addr FROM people p, drive_licence dl, restriction r, driving_condition dc WHERE p.sin = dl.sin AND r.licence_no (+)= dl.licence_no AND dc.c_id (+)= r.r_id AND upper(p.name) = :variable')
 				self.curs2 = self.connection.cursor()
 				self.curs2.prepare("SELECT p.name, p.birthday, dl.licence_no, dl.expiring_date, dc.description , p.addr FROM people p, drive_licence dl, restriction r, driving_condition dc WHERE p.sin = dl.sin AND r.licence_no (+)= dl.licence_no AND dc.c_id (+)= r.r_id AND dl.licence_no = :variable ")
 				self.curs3 = self.connection.cursor()
@@ -90,10 +90,9 @@ class Comm:
 		return
 
 	def search(self, mode, term):
-		#TODO: Case insensitive
 
 		if mode == 1:
-			self.curs1.execute(None, {'variable':term})
+			self.curs1.execute(None, {'variable':term.upper()})
 			rows = self.curs1.fetchall()
 			print("______________________________________________________________________________________________________________________")
 			print("     Name      | Birthday |   Licence #   |Expiry Date|        Condition         |   Address   ")
