@@ -208,6 +208,23 @@ class App:
 			owner['is_primary_owner'] = 'n'
 		# return owner dictionary
 		return owner
+
+	def displayRestrictions(self):
+		print("\nConditions:")
+		# create cursor
+		curs = self.comm.connection.cursor()
+		# create sql statement
+		check = "SELECT * FROM driving_condition"
+		# execute 
+		curs.execute(check)
+		rows = curs.fetchall()
+		curs.close()
+		# check results 
+		if (len(rows) == 0):
+			print("No conditions to show")
+		else:
+			for row in rows:
+				print(str(row[0])+": "+row[1])
 	
 	# Remove the owners of a car
 	def removePrevOwners(self, serial_no):
@@ -310,8 +327,6 @@ class App:
 
 		
 	def driverLicenceReg(self):
-		#TODO: Restrictions (Conditions)
-
 		driver_licence = {}
 
 		driver_licence['licence_no'] = self.comm.getNewID('drive_licence', 'licence_no')
@@ -331,6 +346,8 @@ class App:
 			print ("The Licence Class that you entered is invalid. Please try again.")
 			licence_class = input("Please enter Licence Class:")
 		driver_licence['class'] = licence_class  #Add licence class to the dictionary
+
+
 		photo_name = input("Please insert photo for licence (Optional) :")
 		issuing_date = input("Please enter issuing date of the licence in MM-DD-YYYY format:")
 		while (self.is_date_valid(issuing_date) == False): #check if it is in MM-DD-YYYY format
@@ -342,6 +359,7 @@ class App:
 			print ("Expiring Date that you entered is invalid. Please try again.")
 			expiring_date = input("Please enter expiring date of the licence in MM-DD-YYYY format:")
 		driver_licence['expiring_date'] = parse(expiring_date, dayfirst = False)
+
 		print("Wait, we are processing...")
 		try: 
 			if (photo_name == ""):
@@ -359,6 +377,42 @@ class App:
 			[error] = exc.args
 			print( sys.stderr, "Oracle code:", error.code)
 			print( sys.stderr, "Oracle message:", error.message)
+
+		self.displayRestrictions()
+		while(True):
+			addCons = input("Please enter the number of any applicable conditions from above or press n to add a new one (Optional): ")
+			if addCons == "":
+				break
+			elif addCons == 'n':
+				cond = input("Please enter the condition: ")
+				if cond != "":
+					condition = {}
+					condition['description'] = cond
+					condition['c_id'] = self.comm.getNewID('driving_condition', 'c_id')
+					try:
+						self.comm.insert(condition, 'driving_condition')
+					except cx_Oracle.DatabaseError as exc:
+						print("Sorry could not add the condition")
+					restriction = {}
+					restriction['licence_no'] = driver_licence['licence_no']
+					restriction['r_id'] = condition['c_id']
+					try:
+						self.comm.insert(restriction, 'restriction')
+						print("Successfully added condition")
+					except cx_Oracle.DatabaseError as exc:
+						print("You have already added this condition")
+			else:
+				try:
+					restriction = {}
+					restriction['licence_no'] = driver_licence['licence_no']
+					restriction['r_id'] = int(addCons)
+					try:
+						self.comm.insert(restriction, 'restriction')
+						print("Successfully added condition")
+					except cx_Oracle.DatabaseError as exc:
+						print("You have already added this condition")
+				except ValueError:
+					print("Invalid input. Please try again")
 		
 
 	# get info for new vehicle registration 
