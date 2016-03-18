@@ -411,7 +411,7 @@ class App:
 		
 		# add the vehicle to database
 		self.comm.insert(vehicle, 'vehicle')
-		print("Vehicle with serial # ", serial_no, " successfully registered.")		
+		print("Vehicle with serial #", serial_no, " successfully registered.")		
 		
 		# create owner dictionary to store info
 		owner = {}
@@ -422,7 +422,7 @@ class App:
 		self.comm.insert(owner, 'owner')
 		# loop to keep adding secondary owners 
 		while(True):
-			yes = input('Would you like to add a secondary owner? (y or n)')
+			yes = input('Would you like to add a secondary owner? (y or n):')
 			if (yes == 'y'):
 				# add secondary owner
 				owner = self.addOwner(owner, 1)
