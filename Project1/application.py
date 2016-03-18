@@ -182,10 +182,15 @@ class App:
 	# function to deal with primary/secondary owners 
 	def addOwner(self, owner, mode):
 		# get owner_id
-		owner_id = input("Please enter the owner's sin number: ")
+		if mode == 0:
+			ownerType = "primary"
+		else:
+			ownerType = "secondary"
+
+		owner_id = input("Please enter the "+ ownerType + " owner's sin number: ")
 		while( len(owner_id) > 15 or owner_id == ""): # if sin is invalid
 			print("The sin is invalid. Please try again.")
-			owner_id = input("Please enter the owner's sin number: ")
+			owner_id = input("Please enter the "+ ownerType + " owner's sin number: ")
 		# need to check if person is in database 
 		if (self.checkPersonReg(owner_id) == True):
 			# if returns true we are ok 
@@ -292,7 +297,7 @@ class App:
 			if (another != 'y'):
 				break
 
-			owner = self.addOwner(owner, 0)
+			owner = self.addOwner(owner, 1)
 			try:
 				self.comm.insert(owner, 'owner')
 				print("Owner added.")
@@ -427,7 +432,6 @@ class App:
 			if (yes == 'y'):
 				# add secondary owner
 				owner = self.addOwner(owner, 1)
-				self.comm.insert(owner, 'owner')
 				try:
 					self.comm.insert(owner, 'owner')
 					print("Secondary owner successfully added.")
