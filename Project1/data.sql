@@ -23,6 +23,14 @@ insert into people values
 '356 123 Ave, Edmonton', 'm', date '90-08-10');
 
 
+
+insert into driving_condition values
+(0, 'Weak eyesight');
+insert into driving_condition values
+(1, 'Handicapped');
+
+
+
 insert into drive_licence values
 (0000, 0,'5',null,date '15-03-01',date '20-03-01');
 
@@ -39,6 +47,10 @@ insert into drive_licence values
 (0004, 4, 'nondriving', null, date '14-03-01', date '19-03-01');
 
 
+insert into restriction values
+(3, 0);
+insert into restriction values
+(3, 1);
 
 
 insert into vehicle_type values

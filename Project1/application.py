@@ -282,6 +282,8 @@ class App:
 
 		
 	def driverLicenceReg(self):
+		#TODO: Restrictions (Conditions)
+
 		driver_licence = {}
 
 		driver_licence['licence_no'] = self.comm.getNewID('drive_licence', 'licence_no')
@@ -409,7 +411,7 @@ class App:
 			
 	def violationRec(self):
 		
-		#TODO: Optional fields?
+		#TODO No violator identified
 
 		ticket = {}
 

@@ -20,9 +20,9 @@ class Comm:
 				self.curs = self.connection.cursor()
 				self.cursListKeys = self.connection.cursor()
 				self.curs1 = self.connection.cursor()
-				self.curs1.prepare('SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description , dl.expiring_date FROM people p, drive_licence dl, restriction r, driving_condition dc WHERE p.sin = dl.sin AND r.licence_no (+)= dl.licence_no AND dc.c_id (+)= r.r_id AND p.name =:variable')
+				self.curs1.prepare('SELECT p.name, p.birthday, dl.licence_no, dl.expiring_date, dc.description , p.addr FROM people p, drive_licence dl, restriction r, driving_condition dc WHERE p.sin = dl.sin AND r.licence_no (+)= dl.licence_no AND dc.c_id (+)= r.r_id AND p.name =:variable')
 				self.curs2 = self.connection.cursor()
-				self.curs2.prepare("SELECT p.name, dl.licence_no, p.addr, p.birthday, dc.description , dl.expiring_date FROM people p, drive_licence dl, restriction r, driving_condition dc WHERE p.sin = dl.sin AND r.licence_no (+)= dl.licence_no AND dc.c_id (+)= r.r_id AND dl.licence_no = :variable ")
+				self.curs2.prepare("SELECT p.name, p.birthday, dl.licence_no, dl.expiring_date, dc.description , p.addr FROM people p, drive_licence dl, restriction r, driving_condition dc WHERE p.sin = dl.sin AND r.licence_no (+)= dl.licence_no AND dc.c_id (+)= r.r_id AND dl.licence_no = :variable ")
 				self.curs3 = self.connection.cursor()
 				self.curs3.prepare("SELECT t.*, tt.fine FROM drive_licence dl, ticket t, ticket_type tt WHERE dl.licence_no = :variable AND t.violator_no (+)= dl.sin AND t.vtype = tt.vtype")
 				self.curs4 = self.connection.cursor()
@@ -90,29 +90,70 @@ class Comm:
 		return
 
 	def search(self, mode, term):
+		#TODO: Case insensitive
+
 		if mode == 1:
 			self.curs1.execute(None, {'variable':term})
-			rows = self.curs1.fetchall();		    			
+			rows = self.curs1.fetchall()
+			print("______________________________________________________________________________________________________________________")
+			print("     Name      | Birthday |   Licence #   |Expiry Date|        Condition         |   Address   ")
+			print("``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````")
+			licNo = None
+			for row in rows:
+				if row[1] == licNo:
+					print("               |          |               |           |"+str(row[4])+" "*(26-len(str(row[4])))+"|")
+				else:				
+					print(row[0]+" "*(15-len(row[0]))+"|"+row[1].strftime('%m/%d/%Y')+"  "+"|"+row[2]+" "*(15-len(row[2]))+"|"+row[3].strftime('%m/%d/%Y')+"   "+"|"+str(row[4])+" "*(26-len(str(row[4])))+"|"+row[5])
+				licNo = row[1]
+	
 		elif mode == 2:
 			self.curs2.execute(None, {'variable':int(term)})
-			rows = self.curs2.fetchall();
+			rows = self.curs2.fetchall()
+			print("______________________________________________________________________________________________________________________")
+			print("     Name      | Birthday |   Licence #   |Expiry Date|        Condition         |   Address   ")
+			print("``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````")
+			licNo = None
+			for row in rows:
+				if row[1] == licNo:
+					print("               |          |               |           |"+str(row[4])+" "*(26-len(str(row[4])))+"|")
+				else:				
+					print(row[0]+" "*(15-len(row[0]))+"|"+row[1].strftime('%m/%d/%Y')+"  "+"|"+row[2]+" "*(15-len(row[2]))+"|"+row[3].strftime('%m/%d/%Y')+"   "+"|"+str(row[4])+" "*(26-len(str(row[4])))+"|"+row[5])
+				licNo = row[1]
+
 		elif mode == 3:
 			self.curs3.execute(None, {'variable':int(term)})
-			rows = self.curs3.fetchall();
+			rows = self.curs3.fetchall()
+			print("___________________________________________________________________________________________________________________________________________________")
+			print(" Ticket #  |  Violator SIN |   Vehicle #   |  Officer SIN  |  Violation |   Date   |        Place        |            Description        | Fine   ")
+			print("```````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````")
+			for row in rows:
+				print(str(row[0])+" "*(11-len(str(row[0])))+"|"+row[1]+" "*(15-len(row[1]))+"|"+row[2]+" "*(15-len(row[2]))+"|"+row[3]+" "*(15-len(row[3]))+"|"+row[4]+" "*(12-len(row[4]))+"|"+row[5].strftime('%m/%d/%Y')+"  "+"|"+row[6]+" "*(21-len(row[6]))+"|"+row[7]+" "*(31-len(row[7]))+"|"+str(row[8]))
+
 		elif mode == 4:
 			self.curs4.execute(None, {'variable':int(term)})
-			rows = self.curs4.fetchall();
+			rows = self.curs4.fetchall()
+			print("___________________________________________________________________________________________________________________________________________________")
+			print(" Ticket #  |  Violator SIN |   Vehicle #   |  Officer SIN  |  Violation |   Date   |        Place        |            Description        | Fine   ")
+			print("```````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````")
+			for row in rows:
+				print(str(row[0])+" "*(11-len(str(row[0])))+"|"+row[1]+" "*(15-len(row[1]))+"|"+row[2]+" "*(15-len(row[2]))+"|"+row[3]+" "*(15-len(row[3]))+"|"+row[4]+" "*(12-len(row[4]))+"|"+row[5].strftime('%m/%d/%Y')+"  "+"|"+row[6]+" "*(21-len(row[6]))+"|"+row[7]+" "*(31-len(row[7]))+"|"+str(row[8]))
+
 		else:
 			self.curs5.execute(None, {'variable':int(term)})
-			rows = self.curs5.fetchall();
+			rows = self.curs5.fetchall()
+			print("_________________________________________________________")
+			print("   Times sold   |   Avg Price   |  Violations involved in")
+			print("`````````````````````````````````````````````````````````")
+			for row in rows:
+				print(str(row[0])+ " "*(16-len(str(row[0])))+ "|"+ str(row[1])+ " "*(15-len(str(row[1])))+ "|"+ str(row[2]))	
+
 
 		if len(rows) == 0:
 			print("No results found.")
 			return
 
-		for row in rows:
-			print(row)
-
+                 
+                 
 	def teardown(self):
 		self.curs.close()
 		self.curs1.close()
