@@ -195,14 +195,11 @@ class App:
 			self.regPerson(owner_id)
 		# add their sin to our dict
 		owner['owner_id'] = owner_id
+		# mode = 0 if they are primary owner 
 		if (mode == 0):
-			# is primary owner?
-			prim_own = input("Are they a primary owner('y' or 'n'): ")
-			while( prim_own != 'y' and prim_own != 'n'):
-				print("Invalid input. Please try again.")
-				prim_own = input("Are they a primary owner('y' or 'n'): ")
-			# add response to our dict	
-			owner['is_primary_owner'] = prim_own	
+			owner['is_primary_owner'] = 'y'
+		elif (mode == 1):
+			owner['is_primary_owner'] = 'n'
 		# return owner dictionary
 		return owner
 	
@@ -414,24 +411,30 @@ class App:
 		# add the vehicle to database
 		self.comm.insert(vehicle, 'vehicle')
 		print("Vehicle with serial # ", serial_no, " successfully registered.")		
+		
 		# create owner dictionary to store info
 		owner = {}
+		# store their serial_no
 		owner['vehicle_id'] = serial_no
-		# loop to keep adding owners 
+		# add the primary owner
+		self.addOwner(owner, 0)
+		self.comm.insert(owner, 'owner')
+		# loop to keep adding secondary owners 
 		while(True):
-			# deal with primary and secondary owners 
-			owner = self.addOwner(owner, 0)
-			self.comm.insert(owner, 'owner')
-			try:
+			yes = input('Would you like to add a secondary owner? (y or n)')
+			if (yes == 'y'):
+				# add secondary owner
+				owner = self.addOwner(owner, 1)
 				self.comm.insert(owner, 'owner')
-				print("Owner added.")
-			except cx_Oracle.DatabaseError as exc:
-				error, = exc.args
-				#print( sys.stderr, "Oracle code:", error.code)
-				#print( sys.stderr, "Oracle message:", error.message)
-				print("This person is already an owner of this vehicle.")
-			another = input('Would you like to add another owner? (y or n)')
-			if (another == 'n'):
+				try:
+					self.comm.insert(owner, 'owner')
+					print("Owner added.")
+				except cx_Oracle.DatabaseError as exc:
+					error, = exc.args
+					#print( sys.stderr, "Oracle code:", error.code)
+					#print( sys.stderr, "Oracle message:", error.message)
+					print("This person is already an owner of this vehicle.")
+			else:
 				break
 			
 	def violationRec(self):
