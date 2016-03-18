@@ -6,6 +6,7 @@ import os
 
 class App:
 	
+	# Dictionaries to help display headings
 	choices = {1: 'Vehicle Registration', 2: 'Auto Transaction Registration', 3: 'Driver Licence Registration', 4: 'Violation Record Entry', 5: 'Search Engine'}
 	searchChoices = {1: "Driver Information by Name", 2: "Driver Information by Licence Number", 3: "Violation Records by Licence Number", 4: "Violation Records by SIN", 5: "Vehicle History by Serial Number"}
 
@@ -20,6 +21,7 @@ class App:
 		print("====================================================================")
 		
 		while(True):
+			# Provide options and run the application if the user wishes to continue
 			print("\nEnter 'm' to go back to main menu.")
 			print("Enter 'q' to quit from the system.")
 			print("Enter 'c' to continue to ", self.choices[self.appMode])
@@ -50,6 +52,7 @@ class App:
 				print("You entered an invalid input. Please try again!")
 		
 
+	# Check if a person's SIN is in the system
 	def checkPersonReg(self, sin):
 		curs = self.comm.connection.cursor()
 		check = "SELECT * FROM people p WHERE p.sin = '" + sin + "'"
@@ -61,6 +64,7 @@ class App:
 		else:
 			return True
 
+	# Validate user's input
 	def is_date_valid(self, date):
 		correctDate = None
 		try:
@@ -70,6 +74,7 @@ class App:
 			correctDate = False
 		return correctDate
 
+	# Gather a person's information and insert it into the database
 	def regPerson(self, sin):
 
 		print("\nPerson with the SIN entered not in system. Please register person:")
@@ -125,6 +130,7 @@ class App:
 		self.comm.connection.commit()
 		print("SIN#" + sin + " successfully registered.\n")
 
+	# Check if a person is a vehicle's primary owner
 	def CheckPrimaryOwner(self, seller_id, vehicle_id):
 		curs = self.comm.connection.cursor()
 		check = "SELECT * FROM owner o WHERE vehicle_id = '" + vehicle_id+"' AND owner_id = '" + seller_id+"' AND is_primary_owner = 'y'"
@@ -135,8 +141,17 @@ class App:
 			return False
 		else:
 			return True
-	
 
+	# Get the primary owner of a vehicle
+	def GetPrimaryOwner(self, vehicle_id):
+		curs = self.comm.connection.cursor()
+		check = "SELECT owner_id FROM owner o WHERE vehicle_id = '" + vehicle_id+"' AND is_primary_owner = 'y'"
+		curs.execute(check)
+		rows = curs.fetchall()
+		curs.close()
+		return rows[0][0]
+
+	# Check if person has a licence
 	def CheckIfPersonHasLicence(self, sin):
 		curs = self.comm.connection.cursor()
 		check = "SELECT * FROM drive_licence dl WHERE dl.sin = '" + sin + "'"
@@ -191,6 +206,7 @@ class App:
 		# return owner dictionary
 		return owner
 	
+	# Remove the owners of a car
 	def removePrevOwners(self, serial_no):
 		curs = self.comm.connection.cursor()
 		check = "DELETE FROM owner o WHERE o.vehicle_id = '" + serial_no + "'"
@@ -203,43 +219,51 @@ class App:
 
 		print("Please provide the following information.\n")
 
+		# Obtain and validate vehicle serial no
 		vehicle_id = input("Vehicle serial #: ")
 		while( len(vehicle_id) > 15 or vehicle_id == "" ):
 			print("The serial number that you entered is invalid. Please try again.")
 			vehicle_id = input("Vehicle serial #: ")
 		auto_sale['vehicle_id'] = vehicle_id
+		# Dispkay error if vehicle not registered
 		if not self.checkVehicleReg(vehicle_id):
 			print("This vehicle is not registered. Please register the vehicle first.")
 			return
 
+		# Obtain and validate SIN of seller
 		seller_id = input("SIN of the seller: ")
 		while( len(seller_id) > 15 or seller_id == "" ):
 			print("The SIN that you entered is invalid. Please try again.")
 			seller_id = input("SIN of the seller: ")
+		# Register person if not registered
 		if not self.checkPersonReg(seller_id):
 			self.regPerson(seller_id)
 		auto_sale['seller_id'] = seller_id
 
+		# Display error if seller is not primary owner
 		if not self.CheckPrimaryOwner(seller_id, vehicle_id): 
 			print("\nThe seller is not the primary owner.")
 			print("Please try auto transaction with the primary owner of the vehicle.")
 			return
 
+		# Obtain and validate SIN of buyer
 		buyer_id = input("SIN of the buyer: ")
 		while( len(buyer_id) > 15 or buyer_id == "" ):
 			print("The SIN that you entered is invalid. Please try again.")
 			buyer_id = input("SIN of the buyer: ")
+		# Register person if not registered
 		if not self.checkPersonReg(buyer_id):
 			self.regPerson(buyer_id)
 		auto_sale['buyer_id'] = buyer_id
 
-		
+		# Obtain and validate sale date
 		saleDate = input("Date of the transaction (mm-dd-yyyy): ")
 		while (self.is_date_valid(saleDate) == False): 
 			print ("The date entered is invalid. Please try again.")
 			saleDate = input("Date of the transaction (mm-dd-yyyy): ")
 		auto_sale['s_date'] = parse(saleDate, dayfirst=False) 
 
+		# Obtain and validate price
 		auto_sale['price'] = None
 		while (auto_sale['price'] == None):
 			try:
@@ -248,13 +272,15 @@ class App:
 				print("Input not valid. Please enter a numeric number.")
 				auto_sale['price'] = None
 
+		# Obtain a new unique primary key automatically
 		auto_sale['transaction_id'] = self.comm.getNewID('auto_sale', 'transaction_id')
 
+		
 		self.comm.insert(auto_sale, 'auto_sale')
 
 		self.removePrevOwners(vehicle_id)
 
-
+		# Add owner(s)
 		owner = {}
 		owner['vehicle_id'] = vehicle_id
 		owner['owner_id'] = buyer_id
@@ -274,10 +300,9 @@ class App:
 				print("Owner added.")
 			except cx_Oracle.DatabaseError as exc:
 				error, = exc.args
-				#print( sys.stderr, "Oracle code:", error.code)
-				#print( sys.stderr, "Oracle message:", error.message)
 				print("This person is already an owner of this vehicle.")
 
+		# Display confirmation message
 		print("Auto transaction #" + auto_sale['transaction_id'] + " successfully registered.")
 
 		
@@ -410,13 +435,14 @@ class App:
 				break
 			
 	def violationRec(self):
-		
-		#TODO No violator identified
 
 		ticket = {}
 
+		# Obtain a new unique primary key automatically
 		ticket['ticket_no'] = self.comm.getNewID('ticket', 'ticket_no')
 
+
+		# Obtain and validate all the require info and poppulate a dictionary with it
 		temp = input("Serial # of the vehicle involved: ")
 		while( len(temp) > 15 or temp == "" ):
 			print("The serial # that you entered is invalid. Please try again.")
@@ -426,13 +452,16 @@ class App:
 			return
 		ticket['vehicle_id'] = temp
 
-		temp = input("SIN of the violator: ")
-		while( len(temp) > 15 or temp == "" ):
+		temp = input("SIN of the violator (Optional: ")
+		while( len(temp) > 15):
 			print("The SIN that you entered is invalid. Please try again.")
 			temp = input("SIN of the violator: ")
 		if not self.checkPersonReg(temp):
 			print("This person is not registered.")
 			return
+		if temp == "":
+			# Violator not known. Use primary owner.
+			temp = self.GetPrimaryOwner(ticket['vehicle_id'])
 		ticket['violator_no'] = temp
 
 		temp = input("SIN of the officer: ")
@@ -466,6 +495,7 @@ class App:
 		ticket['descriptions'] = temp
 
 		try:
+			# Use populated dictionary to insert using Comm's insert function
 			self.comm.insert(ticket, 'ticket')
 			print("Successfully entered ticket #", ticket['ticket_no'])
 		except cx_Oracle.DatabaseError as exc:
@@ -483,6 +513,8 @@ class App:
 			print("4. Search violation records by SIN")
 			print("5. Search vehicle history by serial number")
 			print("6. Return to main menu")
+
+			# ask the user to choose a search mode
 			try:
 				choice = int(input("Choose a number: "))
 			except ValueError:
@@ -494,13 +526,16 @@ class App:
 				except ValueError:
 					choice = 0
 
+			# exit to main menu
 			if choice == 6:
 				break
 
+			# display the mode of search
 			print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 			print("                 <<< ", self.searchChoices[choice], " >>>\n")
 
 
+			# loop over asking for the search term and displaying until user wishes otherwise
 			while(True):
 				term = input("Enter search term or leave blank to go back: ")
 				if not term == "":

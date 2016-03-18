@@ -7,16 +7,20 @@ class Comm:
 	def __init__(self, mode):
 		self.authMode = mode
 
+	# Authenticate, establish a connection, and prepare cursors
 	def authenticate(self):
 		successful = False
 		while(not successful):
+			# Get username and password
 			user = input("Username: " )
 			password = getpass.getpass()
 			connString = ''+user+'/'+ password +'@gwynne.cs.ualberta.ca:1521/CRS'
 			try:
 				successful = True
 				self.connection = cx_Oracle.connect(connString)
-				self.user = user			
+				self.user = user
+
+				# Prepare various cursors for various tasks
 				self.curs = self.connection.cursor()
 				self.cursListKeys = self.connection.cursor()
 				self.curs1 = self.connection.cursor()
@@ -30,21 +34,25 @@ class Comm:
 				self.curs5 = self.connection.cursor()
 				self.curs5.prepare("SELECT count(DISTINCT transaction_id), avg(price), count(DISTINCT t.ticket_no) FROM vehicle h, auto_sale a, ticket t WHERE t.vehicle_id (+) = h.serial_no AND a.vehicle_id (+) = h.serial_no GROUP BY h.serial_no HAVING h.serial_no = :variable ")
 				
+			# Display appropriate error message according to the error code
 			except cx_Oracle.DatabaseError as exc:
 				successful = False
 				error, = exc.args
-				#print( sys.stderr, "Oracle code:", error.code)
 				if error.code == 1017:
 					print("Invalid username or password. Please try again.")
 				else:
 					print("Sorry, there was a problem. Please try again.")
 
+	# Given the table name and a dictionary with its values, insert the table into the database
 	def insert(self, table, name):
+
+		# Put together the statement
 		photo = None
 		statement = 'insert into ' + name + '('
 		values = ' values('
 		for key in table:
 			statement+= key +', '
+			# check type of each value to take into account additional requirements
 			if key == 'photo':
 				self.curs.setinputsizes(photo=cx_Oracle.BLOB)
 				photo = table[key]
@@ -59,24 +67,28 @@ class Comm:
 		values = values[:-2]
 		statement += ') ' + values + ')'
 
-		print(statement)
+		# If a photo is to be inserted, use a binding variable
 		if photo == None:
 			self.curs.execute(statement)
 		else:
 			self.curs.execute(statement, {'photo':photo})
 		self.connection.commit()
 
+	# Returns a new unique primary key given the table name and primary key column
 	def getNewID(self, tableName, column):
 		try:
+			# form and execute the query
 			statement = 'select ' + column + ' from ' + tableName
 			self.cursListKeys.execute(statement)
 			rows = self.cursListKeys.fetchall()
 
+			# there are no rows in the table so let's start with 0
 			if len(rows) == 0:
 				return 0
 
 			ids = []
 
+			# add all existing ids in a list and return 1 + max
 			for row in rows:
 				ids.append(int(row[0]))
 
@@ -89,15 +101,19 @@ class Comm:
 			print( sys.stderr, "Oracle message:", error.message)	
 		return
 
+	# Executes the mode's respective prepared cursor and displays results in a user friendly way
 	def search(self, mode, term):
 
 		if mode == 1:
+			# binding variable used along with upper() to allow case insensitive search
 			self.curs1.execute(None, {'variable':term.upper()})
 			rows = self.curs1.fetchall()
+			# display column names
 			print("______________________________________________________________________________________________________________________")
 			print("     Name      | Birthday |   Licence #   |Expiry Date|        Condition         |   Address   ")
 			print("``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````")
 			licNo = None
+			# display all the fields with the right amount of spaces in between
 			for row in rows:
 				if row[1] == licNo:
 					print("               |          |               |           |"+str(row[4])+" "*(26-len(str(row[4])))+"|")
@@ -151,8 +167,7 @@ class Comm:
 			print("No results found.")
 			return
 
-                 
-                 
+	# Clean up
 	def teardown(self):
 		self.curs.close()
 		self.curs1.close()
