@@ -198,6 +198,7 @@ class App:
 		# mode = 0 if they are primary owner 
 		if (mode == 0):
 			owner['is_primary_owner'] = 'y'
+		# mode = 1 if they are a secondary owner
 		elif (mode == 1):
 			owner['is_primary_owner'] = 'n'
 		# return owner dictionary
