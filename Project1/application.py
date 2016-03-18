@@ -255,9 +255,6 @@ class App:
 		while( len(seller_id) > 15 or seller_id == "" ):
 			print("The SIN that you entered is invalid. Please try again.")
 			seller_id = input("SIN of the seller: ")
-		# Register person if not registered
-		if not self.checkPersonReg(seller_id):
-			self.regPerson(seller_id)
 		auto_sale['seller_id'] = seller_id
 
 		# Display error if seller is not primary owner
