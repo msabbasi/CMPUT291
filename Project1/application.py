@@ -367,7 +367,6 @@ class App:
 				driver_licence['photo'] = photo
 			
 			self.comm.insert(driver_licence, 'drive_licence')
-			print("Successfully registered the new driver licence #", driver_licence['licence_no'])
 		except IOError as io_err:
 			print("The photo that you are trying to upload does not exist.")
 		except cx_Oracle.DatabaseError as exc:
@@ -410,6 +409,9 @@ class App:
 						print("You have already added this condition")
 				except ValueError:
 					print("Invalid input. Please try again")
+
+		
+		print("Successfully registered the new driver licence #", driver_licence['licence_no'])
 		
 
 	# get info for new vehicle registration 
