@@ -19,6 +19,14 @@ insert into people values
 '356 123 Ave, Edmonton', 'f', date '93-08-10');
 
 insert into people values
+('5', 'Bob', 136, 162, 'brown', 'black',
+'356 123 Ave, Edmonton', 'm', date '93-08-10');
+
+insert into people values
+('6', 'Bob', 162, 136, 'red', 'blue',
+'444 123 Ave, Edmonton', 'm', date '86-08-10');
+
+insert into people values
 ('088', 'Officer', 162, 136, 'brown', 'black',
 '356 123 Ave, Edmonton', 'm', date '90-08-10');
 
