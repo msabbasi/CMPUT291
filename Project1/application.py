@@ -150,11 +150,15 @@ class App:
 	
 	# check if vehicle is in system 
 	def checkVehicleReg(self, serial_no):
+		# create cursor
 		curs = self.comm.connection.cursor()
+		# create sql statement
 		check = "SELECT * FROM vehicle v WHERE v.serial_no = '" + serial_no + "'"
+		# execute 
 		curs.execute(check)
 		row = curs.fetchall()
 		curs.close()
+		# check results 
 		if (len(row) == 0):
 			return False
 		else:
@@ -184,7 +188,7 @@ class App:
 				prim_own = input("Are they a primary owner('y' or 'n'): ")
 			# add response to our dict	
 			owner['is_primary_owner'] = prim_own	
-	
+		# return owner dictionary
 		return owner
 	
 	def removePrevOwners(self, serial_no):
@@ -327,8 +331,9 @@ class App:
 			print( sys.stderr, "Oracle message:", error.message)
 		
 
-		# get info for new vehicle registration 
+	# get info for new vehicle registration 
 	def vehicleReg(self):
+		# create vehicle dictionary to store info
 		vehicle = {}
 		
 		# get vehicle serial_no
@@ -369,8 +374,7 @@ class App:
 			print("The color that you have entered is invalid. Please try again.")
 			color = input("Please enter the color of the vehicle: ")
 		vehicle['color'] = color
-		# get vehicle type_id
-		# should we have function to look and find the type_id?
+		# get type_id
 		while(True):
 			try:
 				type_id = int(input("Please enter the type_id: "))
@@ -383,10 +387,10 @@ class App:
 		# add the vehicle to database
 		self.comm.insert(vehicle, 'vehicle')
 		print("Vehicle with serial # ", serial_no, " successfully registered.")		
-		
+		# create owner dictionary to store info
 		owner = {}
 		owner['vehicle_id'] = serial_no
-		
+		# loop to keep adding owners 
 		while(True):
 			# deal with primary and secondary owners 
 			owner = self.addOwner(owner, 0)
