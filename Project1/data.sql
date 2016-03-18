@@ -54,6 +54,12 @@ insert into drive_licence values
 insert into drive_licence values
 (0004, 4, 'nondriving', null, date '14-03-01', date '19-03-01');
 
+insert into drive_licence values
+(0005, 5, '5', null, date '14-03-01', date '19-03-01');
+
+insert into drive_licence values
+(0006, 6, '5', null, date '14-03-01', date '19-03-01');
+
 
 insert into restriction values
 (3, 0);
