@@ -516,10 +516,11 @@ class App:
 		while( len(temp) > 15):
 			print("The SIN that you entered is invalid. Please try again.")
 			temp = input("SIN of the violator: ")
-		if not self.checkPersonReg(temp):
-			print("This person is not registered.")
-			return
-		if temp == "":
+		if temp != "":
+			if not self.checkPersonReg(temp):
+				print("This person is not registered.")
+				return
+		else:
 			# Violator not known. Use primary owner.
 			temp = self.GetPrimaryOwner(ticket['vehicle_id'])
 		ticket['violator_no'] = temp
