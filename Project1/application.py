@@ -371,8 +371,10 @@ class App:
 			print("The photo that you are trying to upload does not exist.")
 		except cx_Oracle.DatabaseError as exc:
 			[error] = exc.args
-			print( sys.stderr, "Oracle code:", error.code)
+			#print( sys.stderr, "Oracle code:", error.code)
 			print( sys.stderr, "Oracle message:", error.message)
+			print('Sorry could not register driver licence.')
+			return
 
 		self.displayRestrictions()
 		while(True):
@@ -514,7 +516,7 @@ class App:
 			return
 		ticket['vehicle_id'] = temp
 
-		temp = input("SIN of the violator (Optional: ")
+		temp = input("SIN of the violator (Optional): ")
 		while( len(temp) > 15):
 			print("The SIN that you entered is invalid. Please try again.")
 			temp = input("SIN of the violator: ")
@@ -560,6 +562,7 @@ class App:
 		try:
 			# Use populated dictionary to insert using Comm's insert function
 			self.comm.insert(ticket, 'ticket')
+			#self.comm.connection.commit()
 			print("Successfully entered ticket #", ticket['ticket_no'])
 		except cx_Oracle.DatabaseError as exc:
 			error=exc.args
