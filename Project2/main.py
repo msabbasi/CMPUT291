@@ -1,12 +1,57 @@
 import sys
+from bsddb3 import db
+import random
+
+# Make sure you run "mkdir /tmp/msabbasi_db" first!
+DA_FILE = "/tmp/msabbasi_db/testing_db"
+DB_SIZE = 1000
+SEED = 10000000
+
+def get_random():
+    return random.randint(0, 63)
+def get_random_char():
+    return chr(97 + random.randint(0, 25))
+
+def create_database(mode):
+    database = db.DB()
+    try:
+        # create a btree file
+        if mode == 'btree':
+            database.open(DA_FILE,None, db.DB_BTREE, db.DB_CREATE)
+        elif mode == 'hash':
+            database.open(DA_FILE,None, db.DB_HASH, db.DB_CREATE)
+            
+    except:
+        print("Error creating file.")
+        sys.exit()
+
+    random.seed(SEED)
+
+    for index in range(DB_SIZE):
+        krng = 64 + get_random()
+        key = ""
+        for i in range(krng):
+            key += str(get_random_char())
+        vrng = 64 + get_random()
+        value = ""
+        for i in range(vrng):
+            value += str(get_random_char())
+        #print (key)
+        #print (value)
+        #print ("")
+        key = key.encode(encoding='UTF-8')
+        value = value.encode(encoding='UTF-8')
+        database.put(key, value);
+
+
 
 if len(sys.argv) < 2:
-    print("Usage: mydbtest db_type_option where db_type_option can be btree, hash or index")
+    print("Usage: mydbtest db_type_option where db_type_option can be btree, hash or indexfile")
     sys.exit()
 else:
     mode = sys.argv[1]
-    if mode != 'btree' and mode != 'hash' and mode != 'index':
-        print("Usage: mydbtest db_type_option where db_type_option can be btree, hash or index")
+    if mode != 'btree' and mode != 'hash' and mode != 'indexfile':
+        print("Usage: mydbtest db_type_option where db_type_option can be btree, hash or indexfile")
         sys.exit()
 
 
