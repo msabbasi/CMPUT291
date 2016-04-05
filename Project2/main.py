@@ -7,7 +7,7 @@ import random
 DA_FILE = "/tmp/msabbasi_db/testing_db"
 DB_SIZE = 1000
 SEED = 10000000
-
+answers = open("answers", "w")
 choices = {1: 'Create and populate database', 2: 'Retrieve records with a given key', 3: 'Retrieve records with a given data', 4: 'Retrieve records with a given range of key values', 5: 'Destroy the database', 6: 'Quit'}
 
 # Helper functions
@@ -16,8 +16,12 @@ def get_random():
 def get_random_char():
     return chr(97 + random.randint(0, 25))
 #TODO: Write a function that writes results to a file
-def write_answers():
+def write_answers(ResultToWrite):
+    answers.writelines(ResultToWrite)
     return
+def getData(result):
+    pivot = result.find("'")
+    return result[pivot:]
 
 # Create and populate database
 def create_database(mode, database):
@@ -68,7 +72,9 @@ def search_key(database):
         start_time = time.time()
         result = database.get(key.encode(encoding='UTF-8'))
         stop_time = time.time()
-        write_answers(result)
+        theData = getData(result)
+        write_answers([key+ "\n",theData+"\n","\n"])
+        answer.close()
         #print(result.decode("utf-8"))
         print("Number of records retrieved: ")
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds") 
