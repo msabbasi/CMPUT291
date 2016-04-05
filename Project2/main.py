@@ -1,4 +1,5 @@
 import sys
+import time
 from bsddb3 import db
 import random
 
@@ -7,24 +8,31 @@ DA_FILE = "/tmp/msabbasi_db/testing_db"
 DB_SIZE = 1000
 SEED = 10000000
 
+choices = {1: 'Create and populate database', 2: 'Retrieve records with a given key', 3: 'Retrieve records with a given data', 4: 'Retrieve records with a given range of key values', 5: 'Destroy the database', 6: 'Quit'}
+
+# Helper functions
 def get_random():
     return random.randint(0, 63)
 def get_random_char():
     return chr(97 + random.randint(0, 25))
+#TODO: Write a function that writes results to a file
+def write_answers():
+    return
 
+# Create and populate database
 def create_database(mode, database):
     try:
-        # create a btree file
         if mode == 'btree':
             database.open(DA_FILE, None, db.DB_BTREE, db.DB_CREATE)
         elif mode == 'hash':
-            database.open(DA_FILE, None, db.DB_HASH, db.DB_CREATE)
-            
+            database.open(DA_FILE, None, db.DB_HASH, db.DB_CREATE)    
     except:
         print("Error creating file.")
         sys.exit()
 
     random.seed(SEED)
+
+    #TODO: Display key/data pairs randomly to help search later
 
     for index in range(DB_SIZE):
         krng = 64 + get_random()
@@ -42,12 +50,34 @@ def create_database(mode, database):
         value = value.encode(encoding='UTF-8')
         database.put(key, value);
 
+# Remove the database
 def destroy_database(database):
     try:
         database.close()
         database.remove(DA_FILE, None)
     except Exception as e:
         print (e)
+
+#TODO: Fill the following functions with a loop that asks for information and diplays result
+
+def search_key(database):
+    while(True):
+        key = input("Key (leave empty to return): ")
+        if key == "":
+            break
+        start_time = time.time()
+        result = database.get(key.encode(encoding='UTF-8'))
+        stop_time = time.time()
+        write_answers(result)
+        #print(result.decode("utf-8"))
+        print("Number of records retrieved: ")
+        print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds") 
+
+def search_data(database):
+    print("search data")
+
+def search_range(database):
+    print("retrieve range")
 
 def main():
     if len(sys.argv) < 2:
@@ -63,13 +93,15 @@ def main():
 
     while(True):
         print()
-        print("====================================================================")
-        print("                               MAIN MENU                            ")
-        print("====================================================================")
+        print("============================================================================")
+        print("                                    MAIN MENU                               ")
+        print("============================================================================")
 
         # Get the user to choose an option
         try:
-            choice = int(input("""Please select the number corresponding to your choice: \n1 - Create and populate a database \n2 - Retrieve records with a given key \n3 - Retrieve records with a given data \n4 - Retrieve records with a given range of key values \n5 - Destroy the database \n6 - Quit \nType a number: """ ))
+            for key in choices:
+                print(key, ': ', choices[key])
+            choice = int(input("\nPlease select the number corresponding to your choice: "))
         except ValueError:
             choice = 0
         while (choice > 6 or choice < 1):
@@ -80,31 +112,26 @@ def main():
 
         # Exit if exit option choosen
         if choice == 6:
-            print("Exiting...")
+            print("Exiting...\n")
             break
-        elif choice == 1:
+
+        print()
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print("               ", choices[choice])
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")        
+
+        if choice == 1:
             create_database(mode, database)
         elif choice == 2:
-            print(choice)
-            result = database.get(b'pear')
-            print(result) 
+            search_key(database)
         elif choice == 3:
-            print(choice)
+            search_data(database)
         elif choice == 4:
-            print(choice)
+            search_range(database)
         elif choice == 5:
             destroy_database(database)
 
-        # Start the app supplying the choice and the communicator
-        #app = App(choice, communication)
-        #result = app.run()
-
-        # Exit if the user choose to quit
-        #if result == 0:
-        #    break
-    
-
-    # Clean up
+    #TODO: Clean up nicely when terminating
 
 
 if __name__ == "__main__":
