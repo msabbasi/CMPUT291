@@ -12,13 +12,13 @@ def get_random():
 def get_random_char():
     return chr(97 + random.randint(0, 25))
 
-def create_database(mode):
+def create_database(mode, database):
     try:
         # create a btree file
         if mode == 'btree':
-            database.open(DA_FILE,None, db.DB_BTREE, db.DB_CREATE)
+            database.open(DA_FILE, None, db.DB_BTREE, db.DB_CREATE)
         elif mode == 'hash':
-            database.open(DA_FILE,None, db.DB_HASH, db.DB_CREATE)
+            database.open(DA_FILE, None, db.DB_HASH, db.DB_CREATE)
             
     except:
         print("Error creating file.")
@@ -35,16 +35,17 @@ def create_database(mode):
         value = ""
         for i in range(vrng):
             value += str(get_random_char())
-        #print (key)
-        #print (value)
-        #print ("")
+        print (key)
+        print (value)
+        print ("")
         key = key.encode(encoding='UTF-8')
         value = value.encode(encoding='UTF-8')
         database.put(key, value);
 
-def destroy_database():
+def destroy_database(database):
     try:
         database.close()
+        database.remove(DA_FILE, None)
     except Exception as e:
         print (e)
 
@@ -82,15 +83,17 @@ def main():
             print("Exiting...")
             break
         elif choice == 1:
-            create_database(mode)
+            create_database(mode, database)
         elif choice == 2:
             print(choice)
+            result = database.get(b'pear')
+            print(result) 
         elif choice == 3:
             print(choice)
         elif choice == 4:
             print(choice)
         elif choice == 5:
-            destroy_database()
+            destroy_database(database)
 
         # Start the app supplying the choice and the communicator
         #app = App(choice, communication)
