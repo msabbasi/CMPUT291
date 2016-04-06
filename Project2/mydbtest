@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rm -rf /tmp/msabbasi_db/
+mkdir /tmp/msabbasi_db/
 python3 main.py $1
 
 

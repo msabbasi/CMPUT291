@@ -15,13 +15,14 @@ def get_random():
     return random.randint(0, 63)
 def get_random_char():
     return chr(97 + random.randint(0, 25))
-#TODO: Write a function that writes results to a file
 def write_answers(ResultToWrite):
-    answers.writelines(ResultToWrite)
+    for each in ResultToWrite:
+        answers.write(str(each[0]))
+        answers.write('\n')
+        answers.write(str(each[1]))
+        answers.write('\n')
+        answers.write('\n')
     return
-def getData(result):
-    pivot = result.find("'")
-    return result[pivot:]
 
 # Create and populate database
 def create_database(mode, database):
@@ -66,24 +67,20 @@ def destroy_database(database):
 
 def search_key(database):
     while(True):
-        key = input("Key (leave empty to return): ")
+        key = input("\nKey (leave empty to return): ")
         if key == "":
             break
         start_time = time.time()
         result = database.get(key.encode(encoding='UTF-8'))
         stop_time = time.time()
-        # commented it out just for testing purposes
-        #theData = getData(result)
-        #write_answers([key+ "\n",theData+"\n","\n"])
-        #answer.close()
-        print(result.decode("utf-8"))
-        print("Number of records retrieved: ")
+        write_answers([(key,result.decode("utf-8"))])
+        print("Number of records retrieved: 1")
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds") 
 
 def search_data(database):
     while(True):
         numbKeys = 0
-        value = input("Value (leave empty to return): ")
+        value = input("\nValue (leave empty to return): ")
         if value == "":
             break
         result = []
@@ -99,13 +96,14 @@ def search_data(database):
                 numbKeys = numbKeys + 1
             pair = cur.next()
         stop_time = time.time()
+        write_answers(result)
         print("Number of records retrieved: ", numbKeys)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
 
 def search_range(database):
     while(True):
         numbKeys = 0
-        lower = input("Lower key (leave empty to return): ")
+        lower = input("\nLower key (leave empty to return): ")
         if lower == "":
             break
         upper = input("Upper key (leave empty to return): ")
@@ -125,6 +123,7 @@ def search_range(database):
                 numbKeys = numbKeys + 1
             pair = cur.next()
         stop_time = time.time()
+        write_answers(result)
         print("Number of records retrieved: ", numbKeys)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
 
