@@ -72,17 +72,30 @@ def search_key(database):
         start_time = time.time()
         result = database.get(key.encode(encoding='UTF-8'))
         stop_time = time.time()
-        theData = getData(result)
-        write_answers([key+ "\n",theData+"\n","\n"])
-        answer.close()
-        #print(result.decode("utf-8"))
-        print("Number of records retrieved: ")
+        #theData = getData(result)
+        #write_answers([key+ "\n",theData+"\n","\n"])
+        #answer.close()
+        print(result.decode("utf-8"))
+        print("Number of records retrieved: 1")
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds") 
 
 def search_data(database):
-    print("search data")
+    value = input("Value (leave empty to return): ")
+    if value == "":
+        break
+    key = []
+    cur = database.cursor()
+    iter = cur.first()
+    while iter:
+        start_time = time.time()
+        result = database.get(key.encode(encoding='UTF-8'))
+        if cur[1] == result:
+                key.append(cur[0].decode('utf-8'))
+            cur = cursor.next()
+    stop_time = time.time()
+    return key 
 
-def search_range(database):
+def search_range(database, lower, upper):
     print("retrieve range")
 
 def main():
