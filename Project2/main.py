@@ -116,8 +116,8 @@ def search_range(database):
         while pair:
             #resultLow = database.get(lower.encode(encoding='UTF-8'))
             #resultUpp = database.get(upper.encode(encoding='UTF-8'))
-            if pair[0] > lower and pair[0] < upper:
-                data.append((pair[0], pair[1]))
+            if pair[0] => lower and pair[0] <= upper:
+                data.append(pair)
                 numbKeys = numbKeys + 1
             pair = cur.next()
         stop_time = time.time()
