@@ -90,7 +90,7 @@ def search_data(database):
     iter = cur.first()
     while iter:
         start_time = time.time()
-        result = database.get(key.encode(encoding='UTF-8'))
+        result = database.get(value.encode(encoding='UTF-8'))
         if cur[1] == result:
             key.append(cur[0].decode('utf-8'))
             numbKeys = numbKeys + 1
