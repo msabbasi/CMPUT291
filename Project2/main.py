@@ -81,24 +81,24 @@ def search_key(database):
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds") 
 
 def search_data(database):
-    numbKeys = 0
-    value = input("Value (leave empty to return): ")
-    if value == "":
-        break
-    key = []
-    cur = database.cursor()
-    iter = cur.first()
-    while iter:
-        start_time = time.time()
-        result = database.get(value.encode(encoding='UTF-8'))
-        if cur[1] == result:
-            key.append(cur[0].decode('utf-8'))
-            numbKeys = numbKeys + 1
-            cur = cursor.next()
-    stop_time = time.time()
-    print("Number of records retrieved: ", numbKeys)
-    print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
-    return key 
+    while(True):
+        numbKeys = 0
+        value = input("Value (leave empty to return): ")
+        if value == "":
+            break
+        key = []
+        cur = database.cursor()
+        iter = cur.first()
+        while iter:
+            start_time = time.time()
+            result = database.get(value.encode(encoding='UTF-8'))
+            if cur[1] == result:
+                key.append(cur[0].decode('utf-8'))
+                numbKeys = numbKeys + 1
+                cur = cursor.next()
+        stop_time = time.time()
+        print("Number of records retrieved: ", numbKeys)
+        print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
 
 def search_range(database):
     numbKeys = 0
