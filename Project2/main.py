@@ -76,7 +76,7 @@ def search_key(database):
         #write_answers([key+ "\n",theData+"\n","\n"])
         #answer.close()
         print(result.decode("utf-8"))
-        print("Number of records retrieved: ")
+        print("Number of records retrieved: 1")
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds") 
 
 def search_data(database):
