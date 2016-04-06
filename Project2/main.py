@@ -96,7 +96,24 @@ def search_data(database):
     return key 
 
 def search_range(database, lower, upper):
-    print("retrieve range")
+    lower = input("Lower key (leave empty to return): ")
+    if lower == "":
+        break
+    upper = input("Upper key (leave empty to return): ")
+    if upper == "":
+        break
+    data = []
+    cur = database.cursor()
+    iter = cur.first()
+    while iter:
+        start_time = time.time()
+        resultLow = database.get(lower.encode(encoding='UTF-8'))
+        resultUpp = database.get(upper.encode(encoding='UTF-8'))
+        if cur[0] < resultUpp and cur[0] > resultLow:
+            data.append((cur[0], cur[1]))
+            cur = cursor.next()
+    stop_time = time.time()
+    return data
 
 def main():
     if len(sys.argv) < 2:
