@@ -119,7 +119,7 @@ def search_range(database):
             if pair[0] > lower and pair[0] < upper:
                 data.append((pair[0], pair[1]))
                 numbKeys = numbKeys + 1
-                pair = cur.next()
+            pair = cur.next()
         stop_time = time.time()
         print("Number of records retrieved: ", numbKeys)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
