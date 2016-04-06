@@ -72,10 +72,11 @@ def search_key(database):
         start_time = time.time()
         result = database.get(key.encode(encoding='UTF-8'))
         stop_time = time.time()
-        theData = getData(result)
-        write_answers([key+ "\n",theData+"\n","\n"])
-        answer.close()
-        #print(result.decode("utf-8"))
+        # commented it out just for testing purposes
+        #theData = getData(result)
+        #write_answers([key+ "\n",theData+"\n","\n"])
+        #answer.close()
+        print(result.decode("utf-8"))
         print("Number of records retrieved: ")
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds") 
 
