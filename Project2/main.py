@@ -89,8 +89,8 @@ def search_data(database):
         key = []
         cur = database.cursor()
         iter = cur.first()
+        start_time = time.time()
         while iter:
-            start_time = time.time()
             result = database.get(value.encode(encoding='UTF-8'))
             if cur[1] == result:
                 key.append(cur[0].decode('utf-8'))
@@ -101,28 +101,28 @@ def search_data(database):
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
 
 def search_range(database):
-    numbKeys = 0
-    lower = input("Lower key (leave empty to return): ")
-    if lower == "":
-        break
-    upper = input("Upper key (leave empty to return): ")
-    if upper == "":
-        break
-    data = []
-    cur = database.cursor()
-    iter = cur.first()
-    while iter:
+    while(True):
+        numbKeys = 0
+        lower = input("Lower key (leave empty to return): ")
+        if lower == "":
+            break
+        upper = input("Upper key (leave empty to return): ")
+        if upper == "":
+            break
+        data = []
+        cur = database.cursor()
+        iter = cur.first()
         start_time = time.time()
-        resultLow = database.get(lower.encode(encoding='UTF-8'))
-        resultUpp = database.get(upper.encode(encoding='UTF-8'))
-        if cur[0] < resultUpp and cur[0] > resultLow:
-            data.append((cur[0], cur[1]))
-            numbKeys = numbKeys + 1
-            cur = cursor.next()
-    stop_time = time.time()
-    print("Number of records retrieved: ", numbKeys)
-    print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
-    return data
+        while iter:
+            resultLow = database.get(lower.encode(encoding='UTF-8'))
+            resultUpp = database.get(upper.encode(encoding='UTF-8'))
+            if cur[0] < resultUpp and cur[0] > resultLow:
+                data.append((cur[0], cur[1]))
+                numbKeys = numbKeys + 1
+                cur = cursor.next()
+        stop_time = time.time()
+        print("Number of records retrieved: ", numbKeys)
+        print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
 
 def main():
     if len(sys.argv) < 2:
