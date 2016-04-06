@@ -86,16 +86,18 @@ def search_data(database):
         value = input("Value (leave empty to return): ")
         if value == "":
             break
-        key = []
+        result = []
         cur = database.cursor()
-        iter = cur.first()
         start_time = time.time()
-        while iter:
-            result = database.get(value.encode(encoding='UTF-8'))
-            if cur[1] == result:
-                key.append(cur[0].decode('utf-8'))
+        pair = cur.first()
+        while pair:
+            #result = database.get(value.encode(encoding='UTF-8'))
+            key = pair[0].decode("utf-8")
+            data = pair[1].decode("utf-8")
+            if data == value:
+                result.append((key,data))
                 numbKeys = numbKeys + 1
-                cur = cursor.next()
+            pair = cur.next()
         stop_time = time.time()
         print("Number of records retrieved: ", numbKeys)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
@@ -109,15 +111,17 @@ def search_range(database):
         upper = input("Upper key (leave empty to return): ")
         if upper == "":
             break
-        data = []
+        result = []
         cur = database.cursor()
         start_time = time.time()
         pair = cur.first()
         while pair:
             #resultLow = database.get(lower.encode(encoding='UTF-8'))
             #resultUpp = database.get(upper.encode(encoding='UTF-8'))
-            if pair[0] >= lower and pair[0] <= upper:
-                data.append(pair.decode('utf-8'))
+            key = pair[0].decode("utf-8")
+            data = pair[1].decode("utf-8")
+            if key >= lower and key <= upper:
+                result.append((key, data))
                 numbKeys = numbKeys + 1
             pair = cur.next()
         stop_time = time.time()
