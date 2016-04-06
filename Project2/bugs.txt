@@ -1,0 +1,1 @@
+1. After I populate the database, if I try to populate it again. Program just stop and I cannot do anything.
