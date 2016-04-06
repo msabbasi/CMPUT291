@@ -111,15 +111,15 @@ def search_range(database):
             break
         data = []
         cur = database.cursor()
-        iter = cur.first()
         start_time = time.time()
-        while iter:
-            resultLow = database.get(lower.encode(encoding='UTF-8'))
-            resultUpp = database.get(upper.encode(encoding='UTF-8'))
-            if cur[0] < resultUpp and cur[0] > resultLow:
-                data.append((cur[0], cur[1]))
+        pair = cur.first()
+        while pair:
+            #resultLow = database.get(lower.encode(encoding='UTF-8'))
+            #resultUpp = database.get(upper.encode(encoding='UTF-8'))
+            if pair[0] > lower and pair[0] < upper:
+                data.append((pair[0], pair[1]))
                 numbKeys = numbKeys + 1
-                cur = cursor.next()
+                pair = cur.next()
         stop_time = time.time()
         print("Number of records retrieved: ", numbKeys)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
