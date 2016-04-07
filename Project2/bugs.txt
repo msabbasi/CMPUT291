@@ -1,13 +1,13 @@
 >>I just wanted to add the results, which are not expected, after I test the program
 
 
-1. After I destroy the database, if I want to create it again without exitting the program, it just says "Error creating file" and exits.
+1. (Solved) After I destroy the database, if I want to create it again without exitting the program, it just says "Error creating file" and exits.
 
-2. When I tried to exit from program with 100k without destroying database, it gives a segmentation fault, but not with 1k data.
+2. (Solved) When I tried to exit from program with 100k without destroying database, it gives a segmentation fault, but not with 1k data.
 
-3. if the lower bound is greater than upper bound, program still works for the range search. (I believe that it is not necessary, but it's logical mistake)
+3.  (Solved) if the lower bound is greater than upper bound, program still works for the range search. (I believe that it is not necessary, but it's logical mistake)
 
-4. I don't get it why but when I was destroying the database right after I populated it, there is no problem. However, after I populated database I did 3/4 key search, data search as well as range search. Then, I tried to destroy database and I got segmentation fault. (For Btree)
+4. (Solved)I don't get it why but when I was destroying the database right after I populated it, there is no problem. However, after I populated database I did 3/4 key search, data search as well as range search. Then, I tried to destroy database and I got segmentation fault. (For Btree)
 
 5. 
 
