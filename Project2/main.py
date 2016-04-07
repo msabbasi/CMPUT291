@@ -55,7 +55,8 @@ def create_database(mode, database):
         print ("")
         key = key.encode(encoding='UTF-8')
         value = value.encode(encoding='UTF-8')
-        database.put(key, value);
+        if not database.exists(key):
+            database.put(key, value);
 
 # Remove the database
 def destroy_database(database):
