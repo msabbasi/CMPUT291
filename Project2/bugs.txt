@@ -7,5 +7,5 @@
 
 3. if the lower bound is greater than upper bound, program still works for the range search. (I believe that it is not necessary, but it's logical mistake)
 
-4. I don't get it why but when I was destroying the database right after I populated it, there is no problem. However, after I populated database I did 3/4 key search, data search as well as range search. Then, I tried to destroy database and I got segmentation fault.
+4. I don't get it why but when I was destroying the database right after I populated it, there is no problem. However, after I populated database I did 3/4 key search, data search as well as range search. Then, I tried to destroy database and I got segmentation fault. (For Btree)
 
