@@ -13,8 +13,6 @@ SAMPLE_SIZE = 10
 SEED = 10000000
 choices = {1: 'Create and populate database', 2: 'Retrieve records with a given key', 3: 'Retrieve records with a given data', 4: 'Retrieve records with a given range of key values', 5: 'Destroy the database', 6: 'Quit'}
 
-#TODO: Discuss: Append to answer file? CLear?
-
 # Helper functions
 def get_random():
     return random.randint(0, 63)
@@ -192,9 +190,9 @@ def search_range(database):
                     numbKeys = numbKeys + 1
                 pair = cur.next()
         elif mode == 'btree' or mode == 'indexfile':
-            while pair[0].decode("utf-8") < lower:
+            while pair and pair[0].decode("utf-8") < lower:
                 pair = cur.next()
-            while pair[0].decode("utf-8") <= upper:
+            while pair and pair[0].decode("utf-8") <= upper:
                 key = pair[0].decode("utf-8")
                 data = pair[1].decode("utf-8")
                 result.append((key, data))
