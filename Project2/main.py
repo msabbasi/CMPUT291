@@ -77,10 +77,12 @@ def create_database(mode):
             database_creator.put(ekey, evalue)
             if sec_db_creator != None:
                 sec_db_creator.put(evalue, ekey)
+    #Temprary. For testing.
     database_creator.put("blah".encode(encoding='UTF-8'), "hi".encode(encoding='UTF-8'))
     database_creator.put("lol".encode(encoding='UTF-8'), "hi".encode(encoding='UTF-8'))
-    sec_db_creator.put("hi".encode(encoding='UTF-8'), "lollll".encode(encoding='UTF-8'))
-    sec_db_creator.put("hi".encode(encoding='UTF-8'), "whaaaaa".encode(encoding='UTF-8'))
+    if sec_db_creator != None:
+        sec_db_creator.put("hi".encode(encoding='UTF-8'), "lollll".encode(encoding='UTF-8'))
+        sec_db_creator.put("hi".encode(encoding='UTF-8'), "whaaaaa".encode(encoding='UTF-8'))
     database_creator.close()
     if sec_db_creator != None:
         sec_db_creator.close()
