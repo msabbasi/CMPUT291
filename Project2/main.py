@@ -7,10 +7,12 @@ import shutil
 # Make sure you run "mkdir /tmp/msabbasi_db" first!
 DA_FILE = "/tmp/msabbasi_db/testing_db"
 #TODO:Change db_size to 100,000 before testing
-DB_SIZE = 1000
+DB_SIZE = 100
 SEED = 10000000
-answers = open("answers", "w")
 choices = {1: 'Create and populate database', 2: 'Retrieve records with a given key', 3: 'Retrieve records with a given data', 4: 'Retrieve records with a given range of key values', 5: 'Destroy the database', 6: 'Quit'}
+
+answers = open("answers", "w")
+database = db.DB()
 
 # Helper functions
 def get_random():
@@ -34,11 +36,10 @@ def create_database(mode, database):
         elif mode == 'hash':
             database.open(DA_FILE, None, db.DB_HASH, db.DB_CREATE)    
     except:
-        print("Error creating file.")
-        sys.exit()
+        database.open(DA_FILE)
 
     random.seed(SEED)
-
+           
     #TODO: Store/display key/data pairs randomly to help search later
 
     for index in range(DB_SIZE):
@@ -66,7 +67,8 @@ def destroy_database(database):
     except Exception as e:
         print (e)
 
-def search_key(database):
+def search_key():
+    database.open(DA_FILE)
     while(True):
         key = input("\nKey (leave empty to return): ")
         if key == "":
@@ -78,7 +80,8 @@ def search_key(database):
         print("Number of records retrieved: 1")
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds") 
 
-def search_data(database):
+def search_data():
+    database.open(DA_FILE)
     while(True):
         numbKeys = 0
         value = input("\nValue (leave empty to return): ")
@@ -163,7 +166,7 @@ def main():
             sys.exit()
 
     #TODO: Figure out if option 1 should be mandatory to run when the program is run, if not change it
-    database = db.DB()
+
 
     while(True):
         print()
