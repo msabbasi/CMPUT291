@@ -46,7 +46,8 @@ def create_database(mode):
             database_creator.open(DA_FILE, None, db.DB_BTREE, db.DB_CREATE)
             sec_db_creator = db.DB()
             sec_db_creator.set_flags(db.DB_DUP)
-            sec_db_creator.open(DA_FILE_S, None, db.DB_BTREE, db.DB_CREATE)
+            sec_db_creator.open(DA_FILE_S, None, db.DB_HASH, db.DB_CREATE)
+            #database_creator.associate(sec_db_creator, get_data)
             
     except Exception as e:
         print (e)
@@ -76,8 +77,8 @@ def create_database(mode):
             database_creator.put(ekey, evalue)
             if sec_db_creator != None:
                 sec_db_creator.put(evalue, ekey)
-    database_creator.put("lollll".encode(encoding='UTF-8'), "hi".encode(encoding='UTF-8'))
-    database_creator.put("whaaaaa".encode(encoding='UTF-8'), "hi".encode(encoding='UTF-8'))
+    database_creator.put("blah".encode(encoding='UTF-8'), "hi".encode(encoding='UTF-8'))
+    database_creator.put("lol".encode(encoding='UTF-8'), "hi".encode(encoding='UTF-8'))
     sec_db_creator.put("hi".encode(encoding='UTF-8'), "lollll".encode(encoding='UTF-8'))
     sec_db_creator.put("hi".encode(encoding='UTF-8'), "whaaaaa".encode(encoding='UTF-8'))
     database_creator.close()
@@ -107,7 +108,7 @@ def search_key(database):
         if key == "":
             break
         start_time = time.time()
-        result = database.get(key.encode(encoding='UTF-8'))
+        result = database.get(key.encode(encoding='UTF-8'), None, None, db.DB_MULTIPLE)
         stop_time = time.time()
         try:
             write_answers([(key,result.decode("utf-8"))])
@@ -147,15 +148,14 @@ def search_data_index(database):
         results = []
         cur = database.cursor()
         start_time = time.time()
-        data = 0
-        result = cur.get(key.encode(encoding='UTF-8'), None, db.DB_MULTIPLE_KEY)
+        result = cur.set(key.encode(encoding='UTF-8'))
         while result:
-            results.append((result[0].decode("utf-8"),result[1].decode("utf-8")))
+            results.append((result[1].decode("utf-8"),result[0].decode("utf-8")))
             record = record + 1
             result = cur.next_dup()
         stop_time = time.time()
         try:
-            write_answers([(key,result.decode("utf-8"))])
+            write_answers(results)
         except AttributeError:
             record = 0
         print("Number of records retrieved:", record)
@@ -187,7 +187,7 @@ def search_range(database):
                     result.append((key, data))
                     numbKeys = numbKeys + 1
                 pair = cur.next()
-        elif mode == 'btree':
+        elif mode == 'btree' or mode == 'indexfile':
             while pair[0].decode("utf-8") < lower:
                 pair = cur.next()
             while pair[0].decode("utf-8") <= upper:
@@ -273,6 +273,7 @@ def main():
                 if mode == 'indexfile':
                     sec_db = db.DB()
                     sec_db.open(DA_FILE_S)
+                    #database.associate(sec_db, get_data)
         elif choice == 5:
             destroy_database(False)
             database_exists = False
