@@ -197,7 +197,7 @@ def search_range(database):
         write_answers(result)
         print("Number of records retrieved: ", numbKeys)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
-
+# destroy database and cleanup results
 def cleanup():
     try:
         destroy_database(True)
