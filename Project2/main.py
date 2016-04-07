@@ -6,13 +6,11 @@ import shutil
 import os
 
 DA_FILE = "/tmp/msabbasi_db/testing_db"
+DA_FILE_S = "/tmp/msabbasi_db/secondary_db"
 DB_SIZE = 100
 SEED = 10000000
 choices = {1: 'Create and populate database', 2: 'Retrieve records with a given key', 3: 'Retrieve records with a given data', 4: 'Retrieve records with a given range of key values', 5: 'Destroy the database', 6: 'Quit'}
 
-answers = None
-database = None
-sdatabase = None
 
 # Helper functions
 def get_random():
@@ -30,16 +28,15 @@ def write_answers(ResultToWrite):
     answers.close()
 
 # Create and populate database
-def create_database(mode, database):
-    database = db.DB()
+def create_database(mode):
+    database_creator = db.DB()
     try:
         if mode == 'btree':
-            database.open(DA_FILE, None, db.DB_BTREE, db.DB_CREATE)
+            database_creator.open(DA_FILE, None, db.DB_BTREE, db.DB_CREATE)
         elif mode == 'hash':
-            database.open(DA_FILE, None, db.DB_HASH, db.DB_CREATE)
+            database_creator.open(DA_FILE, None, db.DB_HASH, db.DB_CREATE)
         elif mode == 'indexfile':
-            database.open(DA_FILE, None, db.DB_BTREE, db.DB_CREATE)
-            data
+            database_creator.open(DA_FILE, None, db.DB_BTREE, db.DB_CREATE)
             
     except:
         print("Error creating file.")
@@ -63,19 +60,25 @@ def create_database(mode, database):
         print ("")
         key = key.encode(encoding='UTF-8')
         value = value.encode(encoding='UTF-8')
-        if not database.exists(key):
-            database.put(key, value);
+        if not database_creator.exists(key):
+            database_creator.put(key, value);
+    database_creator.close()
 
 # Remove the database
-def destroy_database(database):
-    if not database:
-        return
+def destroy_database(quitting):    
+    global mode
+    database_remover = db.DB()
+    sec_db_remover = db.DB()
     try:
-        database.close()
-        database.remove(DA_FILE, None)
-        database = None
+        database_remover.remove(DA_FILE, None)
+        if mode == 'indexfile':
+            sec_db_remover.remove(DA_FILE_S, None)
+        database_remover.close()
+        sec_db_remover.close()
+        print("Database successfully destroyed.")
     except Exception as e:
-        print (e)
+        if not quitting:
+            print ("Database does not exist.")
 
 def search_key(database):
     while(True):
@@ -124,6 +127,9 @@ def search_range_hash(database):
         upper = input("Upper key (leave empty to return): ")
         if upper == "":
             break
+        while lower > upper:
+            print("Please enter an upper bound greater than the lower bound.")
+            upper = input("Upper key (leave empty to return): ")
         result = []
         cur = database.cursor()
         start_time = time.time()
@@ -149,6 +155,9 @@ def search_range_btree(database):
         upper = input("Upper key (leave empty to return): ")
         if upper == "":
             break
+        while lower > upper:
+            print("Please enter an upper bound greater than the lower bound.")
+            upper = input("Upper key (leave empty to return): ")
         result = []
         cur = database.cursor()
         start_time = time.time()
@@ -167,13 +176,22 @@ def search_range_btree(database):
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
 
 def cleanup():
-    if answers:
+    try:
         os.remove('answers')
-    if database:
-        destroy_database(database)
+        print("Answers file deleted.")
+    except:
+        pass
+    try:
+        destroy_database(True)
+    except:
+        pass
     shutil.rmtree('/tmp/msabbasi_db')
+    print("/tmp/msabbasi_db removed.")
+    print("Clean up complete.")
 
 def main():
+    global mode
+
     if len(sys.argv) < 2:
         print("Usage: mydbtest db_type_option where db_type_option can be btree, hash or indexfile")
         sys.exit()
@@ -182,6 +200,8 @@ def main():
         if mode != 'btree' and mode != 'hash' and mode != 'indexfile':
             print("Usage: mydbtest db_type_option where db_type_option can be btree, hash or indexfile")
             sys.exit()
+
+    database_exists = False
 
     while(True):
         print()
@@ -204,7 +224,7 @@ def main():
 
         # Exit if exit option choosen
         if choice == 6:
-            print("Exiting...\n")
+            print("Exiting...")
             cleanup()
             break
 
@@ -214,14 +234,20 @@ def main():
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")        
 
         if choice == 1:
-            if database:
+            if database_exists:
                 print("Database already created.")
             else:
-                create_database(mode, database)
+                create_database(mode)
+                print("Database successfully created.")
+                database_exists = True
+                database = db.DB()
+                database.open(DA_FILE)
         elif choice == 5:
-            destroy_database(database)
-        elif not database:
-                print("Database not created. Please create the database first.")
+            destroy_database(False)
+            database_exists = False
+            database.close()
+        elif not database_exists:
+                print("Database not found. Please create the database first.")
         elif choice == 2:
             search_key(database)
         elif choice == 3:
