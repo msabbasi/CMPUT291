@@ -110,7 +110,7 @@ def search_key(database):
         if key == "":
             break
         start_time = time.time()
-        result = database.get(key.encode(encoding='UTF-8'), None, None, db.DB_MULTIPLE)
+        result = database.get(key.encode(encoding='UTF-8'))
         stop_time = time.time()
         try:
             write_answers([(key,result.decode("utf-8"))])
