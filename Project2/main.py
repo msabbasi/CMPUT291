@@ -265,7 +265,6 @@ def main():
                 if mode == 'indexfile':
                     sec_db = db.DB()
                     sec_db.open(DA_FILE_S)
-                    #database.associate(sec_db, get_data)
         elif choice == 5:
             destroy_database(False)
             database_exists = False
