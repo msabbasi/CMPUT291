@@ -1,7 +1,7 @@
 #!/bin/bash
 
-rm -rf /tmp/msabbasi_db/
-mkdir /tmp/msabbasi_db/
+rm -rf /tmp/sumeeye_db/
+mkdir /tmp/sumeeye_db/
 python3 main.py $1
 
 
