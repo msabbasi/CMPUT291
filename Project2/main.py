@@ -46,6 +46,7 @@ def create_database(mode):
         elif mode == 'indexfile':
             database_creator.open(DA_FILE, None, db.DB_BTREE, db.DB_CREATE)
             sec_db_creator = db.DB()
+            # Allow the secondary index to have duplicates
             sec_db_creator.set_flags(db.DB_DUP)
             sec_db_creator.open(DA_FILE_S, None, db.DB_HASH, db.DB_CREATE)
     except Exception as e:
@@ -69,6 +70,7 @@ def create_database(mode):
         ekey = key.encode(encoding='UTF-8')
         evalue = value.encode(encoding='UTF-8')
         if not database_creator.exists(ekey):
+            # Display a few of the entries to be used in testing
             if index % (DB_SIZE/SAMPLE_SIZE) == 0:
                 print (key)
                 print (value)
@@ -95,6 +97,7 @@ def destroy_database(quitting):
     except Exception as e:
         if not quitting:
             print ("Database does not exist.")
+
 # function to perform a key search
 def search_key(database):
     while(True):
@@ -111,6 +114,7 @@ def search_key(database):
             record = 0
         print("Number of records retrieved:", record)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
+
 # function to perform a data search
 def search_data(database):
     while(True):
@@ -122,6 +126,7 @@ def search_data(database):
         cur = database.cursor()
         start_time = time.time()
         pair = cur.first()
+        # Go through all key/data pairs to search for data matches
         while pair:
             key = pair[0].decode("utf-8")
             data = pair[1].decode("utf-8")
@@ -143,10 +148,12 @@ def search_data_index(database):
         results = []
         cur = database.cursor()
         start_time = time.time()
+        # Search the secondary index for the data
         result = cur.set(key.encode(encoding='UTF-8'))
         while result:
             results.append((result[1].decode("utf-8"),result[0].decode("utf-8")))
             record = record + 1
+            # Check if any duplicates
             result = cur.next_dup()
         stop_time = time.time()
         try:
@@ -167,6 +174,7 @@ def search_range(database):
         upper = input("Upper key (leave empty to return): ")
         if upper == "":
             break
+        # Make sure lower bound is lower than upper bound
         while lower > upper:
             print("Please enter an upper bound greater than the lower bound.")
             upper = input("Upper key (leave empty to return): ")
@@ -176,6 +184,7 @@ def search_range(database):
         cur = database.cursor()
         start_time = time.time()
         pair = cur.first()
+        # Go through all records to find all keys within range
         if mode == 'hash':
             while pair:
                 key = pair[0].decode("utf-8")
@@ -184,6 +193,7 @@ def search_range(database):
                     result.append((key, data))
                     numbKeys = numbKeys + 1
                 pair = cur.next()
+        # Just find the start of the lower limit and retrieve data up to the upper limit
         elif mode == 'btree' or mode == 'indexfile':
             while pair and pair[0].decode("utf-8") < lower:
                 pair = cur.next()
@@ -253,6 +263,7 @@ def main():
         print("               ", choices[choice])
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")        
 
+        # Depending on the mode and the choice run the appropriate functions
         if choice == 1:
             if database_exists:
                 print("Database already created.")
@@ -260,6 +271,7 @@ def main():
                 create_database(mode)
                 print("Database successfully created.")
                 database_exists = True
+                # create db handlers for the queries
                 database = db.DB()
                 database.open(DA_FILE)
                 if mode == 'indexfile':
@@ -268,6 +280,7 @@ def main():
         elif choice == 5:
             destroy_database(False)
             database_exists = False
+            # remove db handlers for the queries
             database.close()
             if mode == 'indexfile':                
                 sec_db.close()
