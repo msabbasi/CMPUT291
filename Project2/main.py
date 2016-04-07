@@ -8,7 +8,7 @@ import numpy
 
 DA_FILE = "/tmp/msabbasi_db/testing_db"
 DA_FILE_S = "/tmp/msabbasi_db/secondary_db"
-DB_SIZE = 100
+DB_SIZE = 100000
 SAMPLE_SIZE = 10
 SEED = 10000000
 choices = {1: 'Create and populate database', 2: 'Retrieve records with a given key', 3: 'Retrieve records with a given data', 4: 'Retrieve records with a given range of key values', 5: 'Destroy the database', 6: 'Quit'}
