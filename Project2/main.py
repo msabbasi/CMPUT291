@@ -4,13 +4,16 @@ from bsddb3 import db
 import random
 import shutil
 import os
+import numpy
 
 DA_FILE = "/tmp/msabbasi_db/testing_db"
 DA_FILE_S = "/tmp/msabbasi_db/secondary_db"
 DB_SIZE = 100
+SAMPLE_SIZE = 10
 SEED = 10000000
 choices = {1: 'Create and populate database', 2: 'Retrieve records with a given key', 3: 'Retrieve records with a given data', 4: 'Retrieve records with a given range of key values', 5: 'Destroy the database', 6: 'Quit'}
 
+#TODO: Discuss: Append to answer file? CLear?
 
 # Helper functions
 def get_random():
@@ -18,7 +21,7 @@ def get_random():
 def get_random_char():
     return chr(97 + random.randint(0, 25))
 def write_answers(ResultToWrite):
-    answers = open("answers", "w")
+    answers = open("answers", "a")
     for each in ResultToWrite:
         answers.write(str(each[0]))
         answers.write('\n')
@@ -27,9 +30,13 @@ def write_answers(ResultToWrite):
         answers.write('\n')
     answers.close()
 
+def get_data(primarykey, primarydata):
+    return primarydata
+
 # Create and populate database
 def create_database(mode):
     database_creator = db.DB()
+    sec_db_creator = None
     try:
         if mode == 'btree':
             database_creator.open(DA_FILE, None, db.DB_BTREE, db.DB_CREATE)
@@ -37,14 +44,18 @@ def create_database(mode):
             database_creator.open(DA_FILE, None, db.DB_HASH, db.DB_CREATE)
         elif mode == 'indexfile':
             database_creator.open(DA_FILE, None, db.DB_BTREE, db.DB_CREATE)
+            sec_db_creator = db.DB()
+            sec_db_creator.set_flags(db.DB_DUP)
+            sec_db_creator.open(DA_FILE_S, None, db.DB_BTREE, db.DB_CREATE)
             
-    except:
+    except Exception as e:
+        print (e)
         print("Error creating file.")
         sys.exit()
 
     random.seed(SEED)
 
-    #TODO: Store/display key/data pairs randomly to help search later
+    print("Sample entries for testing:\n")
 
     for index in range(DB_SIZE):
         krng = 64 + get_random()
@@ -55,14 +66,23 @@ def create_database(mode):
         value = ""
         for i in range(vrng):
             value += str(get_random_char())
-        print (key)
-        print (value)
-        print ("")
-        key = key.encode(encoding='UTF-8')
-        value = value.encode(encoding='UTF-8')
-        if not database_creator.exists(key):
-            database_creator.put(key, value);
+        ekey = key.encode(encoding='UTF-8')
+        evalue = value.encode(encoding='UTF-8')
+        if not database_creator.exists(ekey):
+            if index % (DB_SIZE/SAMPLE_SIZE) == 0:
+                print (key)
+                print (value)
+                print ("")
+            database_creator.put(ekey, evalue)
+            if sec_db_creator != None:
+                sec_db_creator.put(evalue, ekey)
+    database_creator.put("lollll".encode(encoding='UTF-8'), "hi".encode(encoding='UTF-8'))
+    database_creator.put("whaaaaa".encode(encoding='UTF-8'), "hi".encode(encoding='UTF-8'))
+    sec_db_creator.put("hi".encode(encoding='UTF-8'), "lollll".encode(encoding='UTF-8'))
+    sec_db_creator.put("hi".encode(encoding='UTF-8'), "whaaaaa".encode(encoding='UTF-8'))
     database_creator.close()
+    if sec_db_creator != None:
+        sec_db_creator.close()
 
 # Remove the database
 def destroy_database(quitting):    
@@ -118,35 +138,32 @@ def search_data(database):
         print("Number of records retrieved: ", numbKeys)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
 
-def search_range_hash(database):
+def search_data_index(database):
     while(True):
-        numbKeys = 0
-        lower = input("\nLower key (leave empty to return): ")
-        if lower == "":
+        record = 0
+        key = input("\nValue (leave empty to return): ")
+        if key == "":
             break
-        upper = input("Upper key (leave empty to return): ")
-        if upper == "":
-            break
-        while lower > upper:
-            print("Please enter an upper bound greater than the lower bound.")
-            upper = input("Upper key (leave empty to return): ")
-        result = []
+        results = []
         cur = database.cursor()
         start_time = time.time()
-        pair = cur.first()
-        while pair:
-            key = pair[0].decode("utf-8")
-            data = pair[1].decode("utf-8")
-            if key >= lower and key <= upper:
-                result.append((key, data))
-                numbKeys = numbKeys + 1
-            pair = cur.next()
+        data = 0
+        result = cur.get(key.encode(encoding='UTF-8'), None, db.DB_MULTIPLE_KEY)
+        while result:
+            results.append((result[0].decode("utf-8"),result[1].decode("utf-8")))
+            record = record + 1
+            result = cur.next_dup()
         stop_time = time.time()
-        write_answers(result)
-        print("Number of records retrieved: ", numbKeys)
+        try:
+            write_answers([(key,result.decode("utf-8"))])
+        except AttributeError:
+            record = 0
+        print("Number of records retrieved:", record)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
 
-def search_range_btree(database):
+def search_range(database):
+    global mode
+
     while(True):
         numbKeys = 0
         lower = input("\nLower key (leave empty to return): ")
@@ -162,25 +179,34 @@ def search_range_btree(database):
         cur = database.cursor()
         start_time = time.time()
         pair = cur.first()
-        while pair[0].decode("utf-8") < lower:
-            pair = cur.next()
-        while pair[0].decode("utf-8") <= upper:
-            key = pair[0].decode("utf-8")
-            data = pair[1].decode("utf-8")
-            result.append((key, data))
-            numbKeys = numbKeys + 1
-            pair = cur.next()
+        if mode == 'hash':
+            while pair:
+                key = pair[0].decode("utf-8")
+                data = pair[1].decode("utf-8")
+                if key >= lower and key <= upper:
+                    result.append((key, data))
+                    numbKeys = numbKeys + 1
+                pair = cur.next()
+        elif mode == 'btree':
+            while pair[0].decode("utf-8") < lower:
+                pair = cur.next()
+            while pair[0].decode("utf-8") <= upper:
+                key = pair[0].decode("utf-8")
+                data = pair[1].decode("utf-8")
+                result.append((key, data))
+                numbKeys = numbKeys + 1
+                pair = cur.next()
         stop_time = time.time()
         write_answers(result)
         print("Number of records retrieved: ", numbKeys)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
 
 def cleanup():
-    try:
-        os.remove('answers')
-        print("Answers file deleted.")
-    except:
-        pass
+    #try:
+    #    os.remove('answers')
+    #    print("Answers file deleted.")
+    #except:
+    #    pass
     try:
         destroy_database(True)
     except:
@@ -202,6 +228,8 @@ def main():
             sys.exit()
 
     database_exists = False
+    answers = open("answers", "w")
+    answers.close()
 
     while(True):
         print()
@@ -242,21 +270,26 @@ def main():
                 database_exists = True
                 database = db.DB()
                 database.open(DA_FILE)
+                if mode == 'indexfile':
+                    sec_db = db.DB()
+                    sec_db.open(DA_FILE_S)
         elif choice == 5:
             destroy_database(False)
             database_exists = False
             database.close()
+            if mode == 'indexfile':                
+                sec_db.close()
         elif not database_exists:
                 print("Database not found. Please create the database first.")
         elif choice == 2:
             search_key(database)
         elif choice == 3:
-            search_data(database)
+            if mode == 'indexfile':
+                search_data_index(sec_db)
+            else:
+                search_data(database)
         elif choice == 4:
-            if mode == 'hash':
-                search_range_hash(database)
-            elif mode == 'btree':
-                search_range_btree(database)
+            search_range(database)
 
 if __name__ == "__main__":
     try:
