@@ -7,7 +7,7 @@ import shutil
 # Make sure you run "mkdir /tmp/msabbasi_db" first!
 DA_FILE = "/tmp/msabbasi_db/testing_db"
 #TODO:Change db_size to 100,000 before testing
-DB_SIZE = 1000
+DB_SIZE = 100000
 SEED = 10000000
 answers = open("answers", "w")
 choices = {1: 'Create and populate database', 2: 'Retrieve records with a given key', 3: 'Retrieve records with a given data', 4: 'Retrieve records with a given range of key values', 5: 'Destroy the database', 6: 'Quit'}
