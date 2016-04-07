@@ -68,6 +68,7 @@ def destroy_database(database):
 
 def search_key(database):
     while(True):
+        record = 1
         key = input("\nKey (leave empty to return): ")
         if key == "":
             break
