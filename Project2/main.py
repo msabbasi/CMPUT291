@@ -148,7 +148,7 @@ def search_data_index(database):
         cur = database.cursor()
         start_time = time.time()
         data = 0
-        result = cur.get(key.encode(encoding='UTF-8'), None, db.DB_MULTIPLE_KEY)
+        result = cur.get(key.encode(encoding='UTF-8'))
         while result:
             results.append((result[0].decode("utf-8"),result[1].decode("utf-8")))
             record = record + 1
