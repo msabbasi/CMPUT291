@@ -74,9 +74,12 @@ def search_key(database):
         start_time = time.time()
         result = database.get(key.encode(encoding='UTF-8'))
         stop_time = time.time()
-        write_answers([(key,result.decode("utf-8"))])
-        print("Number of records retrieved: 1")
-        print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds") 
+        try:
+            write_answers([(key,result.decode("utf-8"))])
+        except AttributeError:
+            record = 0
+        print("Number of records retrieved:", record)
+        print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
 
 def search_data(database):
     while(True):
