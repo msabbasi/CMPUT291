@@ -14,10 +14,13 @@ SEED = 10000000
 choices = {1: 'Create and populate database', 2: 'Retrieve records with a given key', 3: 'Retrieve records with a given data', 4: 'Retrieve records with a given range of key values', 5: 'Destroy the database', 6: 'Quit'}
 
 # Helper functions
+# get random int 
 def get_random():
     return random.randint(0, 63)
+# get random char 
 def get_random_char():
     return chr(97 + random.randint(0, 25))
+# function to help write to our answers file 
 def write_answers(ResultToWrite):
     answers = open("answers", "a")
     for each in ResultToWrite:
@@ -27,7 +30,7 @@ def write_answers(ResultToWrite):
         answers.write('\n')
         answers.write('\n')
     answers.close()
-
+# return data based on the key
 def get_data(primarykey, primarydata):
     return primarydata
 
@@ -45,8 +48,6 @@ def create_database(mode):
             sec_db_creator = db.DB()
             sec_db_creator.set_flags(db.DB_DUP)
             sec_db_creator.open(DA_FILE_S, None, db.DB_HASH, db.DB_CREATE)
-            #database_creator.associate(sec_db_creator, get_data)
-            
     except Exception as e:
         print (e)
         print("Error creating file.")
@@ -55,7 +56,7 @@ def create_database(mode):
     random.seed(SEED)
 
     print("Sample entries for testing:\n")
-
+    # generate the data 
     for index in range(DB_SIZE):
         krng = 64 + get_random()
         key = ""
@@ -75,12 +76,6 @@ def create_database(mode):
             database_creator.put(ekey, evalue)
             if sec_db_creator != None:
                 sec_db_creator.put(evalue, ekey)
-    #Temprary. For testing.
-    database_creator.put("blah".encode(encoding='UTF-8'), "hi".encode(encoding='UTF-8'))
-    database_creator.put("lol".encode(encoding='UTF-8'), "hi".encode(encoding='UTF-8'))
-    if sec_db_creator != None:
-        sec_db_creator.put("hi".encode(encoding='UTF-8'), "lollll".encode(encoding='UTF-8'))
-        sec_db_creator.put("hi".encode(encoding='UTF-8'), "whaaaaa".encode(encoding='UTF-8'))
     database_creator.close()
     if sec_db_creator != None:
         sec_db_creator.close()
@@ -100,7 +95,7 @@ def destroy_database(quitting):
     except Exception as e:
         if not quitting:
             print ("Database does not exist.")
-
+# function to perform a key search
 def search_key(database):
     while(True):
         record = 1
@@ -116,7 +111,7 @@ def search_key(database):
             record = 0
         print("Number of records retrieved:", record)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
-
+# function to perform a data search
 def search_data(database):
     while(True):
         numbKeys = 0
@@ -138,7 +133,7 @@ def search_data(database):
         write_answers(result)
         print("Number of records retrieved: ", numbKeys)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
-
+# function to perform a data search with our indexfile
 def search_data_index(database):
     while(True):
         record = 0
@@ -160,7 +155,7 @@ def search_data_index(database):
             record = 0
         print("Number of records retrieved:", record)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
-
+# function to perform a range search
 def search_range(database):
     global mode
 
@@ -204,11 +199,6 @@ def search_range(database):
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
 
 def cleanup():
-    #try:
-    #    os.remove('answers')
-    #    print("Answers file deleted.")
-    #except:
-    #    pass
     try:
         destroy_database(True)
     except:
