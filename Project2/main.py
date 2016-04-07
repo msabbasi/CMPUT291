@@ -175,6 +175,8 @@ def search_range(database):
         while lower > upper:
             print("Please enter an upper bound greater than the lower bound.")
             upper = input("Upper key (leave empty to return): ")
+            if upper == "":
+                return
         result = []
         cur = database.cursor()
         start_time = time.time()
