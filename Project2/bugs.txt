@@ -1,1 +1,4 @@
-1. After I populate the database, if I try to populate it again. Program just stop and I cannot do anything.
+>>I just wanted to add the results, which are not expected, after I test the program
+
+
+1. After I destroy the database, if I want to create it again without exitting the program, it just says "Error creating file" and exits.
