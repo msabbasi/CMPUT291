@@ -3,14 +3,16 @@ import time
 from bsddb3 import db
 import random
 import shutil
+import os
 
-# Make sure you run "mkdir /tmp/msabbasi_db" first!
 DA_FILE = "/tmp/msabbasi_db/testing_db"
-#TODO:Change db_size to 100,000 before testing
-DB_SIZE = 1000
+DB_SIZE = 100
 SEED = 10000000
-answers = open("answers", "w")
 choices = {1: 'Create and populate database', 2: 'Retrieve records with a given key', 3: 'Retrieve records with a given data', 4: 'Retrieve records with a given range of key values', 5: 'Destroy the database', 6: 'Quit'}
+
+answers = None
+database = None
+sdatabase = None
 
 # Helper functions
 def get_random():
@@ -18,21 +20,27 @@ def get_random():
 def get_random_char():
     return chr(97 + random.randint(0, 25))
 def write_answers(ResultToWrite):
+    answers = open("answers", "w")
     for each in ResultToWrite:
         answers.write(str(each[0]))
         answers.write('\n')
         answers.write(str(each[1]))
         answers.write('\n')
         answers.write('\n')
-    return
+    answers.close()
 
 # Create and populate database
 def create_database(mode, database):
+    database = db.DB()
     try:
         if mode == 'btree':
             database.open(DA_FILE, None, db.DB_BTREE, db.DB_CREATE)
         elif mode == 'hash':
-            database.open(DA_FILE, None, db.DB_HASH, db.DB_CREATE)    
+            database.open(DA_FILE, None, db.DB_HASH, db.DB_CREATE)
+        elif mode == 'indexfile':
+            database.open(DA_FILE, None, db.DB_BTREE, db.DB_CREATE)
+            data
+            
     except:
         print("Error creating file.")
         sys.exit()
@@ -60,9 +68,12 @@ def create_database(mode, database):
 
 # Remove the database
 def destroy_database(database):
+    if not database:
+        return
     try:
         database.close()
         database.remove(DA_FILE, None)
+        database = None
     except Exception as e:
         print (e)
 
@@ -155,6 +166,12 @@ def search_range_btree(database):
         print("Number of records retrieved: ", numbKeys)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
 
+def cleanup():
+    if answers:
+        os.remove('answers')
+    if database:
+        destroy_database(database)
+    shutil.rmtree('/tmp/msabbasi_db')
 
 def main():
     if len(sys.argv) < 2:
@@ -165,9 +182,6 @@ def main():
         if mode != 'btree' and mode != 'hash' and mode != 'indexfile':
             print("Usage: mydbtest db_type_option where db_type_option can be btree, hash or indexfile")
             sys.exit()
-
-    #TODO: Figure out if option 1 should be mandatory to run when the program is run, if not change it
-    database = db.DB()
 
     while(True):
         print()
@@ -191,6 +205,7 @@ def main():
         # Exit if exit option choosen
         if choice == 6:
             print("Exiting...\n")
+            cleanup()
             break
 
         print()
@@ -199,7 +214,14 @@ def main():
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")        
 
         if choice == 1:
-            create_database(mode, database)
+            if database:
+                print("Database already created.")
+            else:
+                create_database(mode, database)
+        elif choice == 5:
+            destroy_database(database)
+        elif not database:
+                print("Database not created. Please create the database first.")
         elif choice == 2:
             search_key(database)
         elif choice == 3:
@@ -209,12 +231,10 @@ def main():
                 search_range_hash(database)
             elif mode == 'btree':
                 search_range_btree(database)
-        elif choice == 5:
-            destroy_database(database)
-
-    #TODO: Clean up nicely when terminating, delete answers
-    #shutil.rmtree('/folder_name')
 
 if __name__ == "__main__":
-    main()
-
+    try:
+        main()
+    except KeyboardInterrupt:
+        cleanup()
+        
