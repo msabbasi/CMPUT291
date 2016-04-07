@@ -2,9 +2,11 @@ import sys
 import time
 from bsddb3 import db
 import random
+import shutil
 
 # Make sure you run "mkdir /tmp/msabbasi_db" first!
 DA_FILE = "/tmp/msabbasi_db/testing_db"
+#TODO:Change db_size to 100,000 before testing
 DB_SIZE = 1000
 SEED = 10000000
 answers = open("answers", "w")
@@ -37,7 +39,7 @@ def create_database(mode, database):
 
     random.seed(SEED)
 
-    #TODO: Display key/data pairs randomly to help search later
+    #TODO: Store/display key/data pairs randomly to help search later
 
     for index in range(DB_SIZE):
         krng = 64 + get_random()
@@ -53,7 +55,8 @@ def create_database(mode, database):
         print ("")
         key = key.encode(encoding='UTF-8')
         value = value.encode(encoding='UTF-8')
-        database.put(key, value);
+        if not database.exists(key):
+            database.put(key, value);
 
 # Remove the database
 def destroy_database(database):
@@ -62,8 +65,6 @@ def destroy_database(database):
         database.remove(DA_FILE, None)
     except Exception as e:
         print (e)
-
-#TODO: Fill the following functions with a loop that asks for information and diplays result
 
 def search_key(database):
     while(True):
@@ -88,7 +89,6 @@ def search_data(database):
         start_time = time.time()
         pair = cur.first()
         while pair:
-            #result = database.get(value.encode(encoding='UTF-8'))
             key = pair[0].decode("utf-8")
             data = pair[1].decode("utf-8")
             if data == value:
@@ -100,7 +100,7 @@ def search_data(database):
         print("Number of records retrieved: ", numbKeys)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
 
-def search_range(database):
+def search_range_hash(database):
     while(True):
         numbKeys = 0
         lower = input("\nLower key (leave empty to return): ")
@@ -114,8 +114,6 @@ def search_range(database):
         start_time = time.time()
         pair = cur.first()
         while pair:
-            #resultLow = database.get(lower.encode(encoding='UTF-8'))
-            #resultUpp = database.get(upper.encode(encoding='UTF-8'))
             key = pair[0].decode("utf-8")
             data = pair[1].decode("utf-8")
             if key >= lower and key <= upper:
@@ -127,6 +125,33 @@ def search_range(database):
         print("Number of records retrieved: ", numbKeys)
         print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
 
+def search_range_btree(database):
+    while(True):
+        numbKeys = 0
+        lower = input("\nLower key (leave empty to return): ")
+        if lower == "":
+            break
+        upper = input("Upper key (leave empty to return): ")
+        if upper == "":
+            break
+        result = []
+        cur = database.cursor()
+        start_time = time.time()
+        pair = cur.first()
+        while pair[0].decode("utf-8") < lower:
+            pair = cur.next()
+        while pair[0].decode("utf-8") <= upper:
+            key = pair[0].decode("utf-8")
+            data = pair[1].decode("utf-8")
+            result.append((key, data))
+            numbKeys = numbKeys + 1
+            pair = cur.next()
+        stop_time = time.time()
+        write_answers(result)
+        print("Number of records retrieved: ", numbKeys)
+        print("Total execution time: ", (stop_time-start_time)*1000000, "microseconds")
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: mydbtest db_type_option where db_type_option can be btree, hash or indexfile")
@@ -137,6 +162,7 @@ def main():
             print("Usage: mydbtest db_type_option where db_type_option can be btree, hash or indexfile")
             sys.exit()
 
+    #TODO: Figure out if option 1 should be mandatory to run when the program is run, if not change it
     database = db.DB()
 
     while(True):
@@ -175,12 +201,15 @@ def main():
         elif choice == 3:
             search_data(database)
         elif choice == 4:
-            search_range(database)
+            if mode == 'hash':
+                search_range_hash(database)
+            elif mode == 'btree':
+                search_range_btree(database)
         elif choice == 5:
             destroy_database(database)
 
-    #TODO: Clean up nicely when terminating
-
+    #TODO: Clean up nicely when terminating, delete answers
+    #shutil.rmtree('/folder_name')
 
 if __name__ == "__main__":
     main()
