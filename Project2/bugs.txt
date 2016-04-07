@@ -9,3 +9,10 @@
 
 4. I don't get it why but when I was destroying the database right after I populated it, there is no problem. However, after I populated database I did 3/4 key search, data search as well as range search. Then, I tried to destroy database and I got segmentation fault. (For Btree)
 
+5. There is typo in line 124. 
+File "main.py", line 124, in search_range_hash
+    iresult.append((key, data))
+NameError: name 'iresult' is not defined
+
+6.
+
